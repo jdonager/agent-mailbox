@@ -18,10 +18,29 @@ For local development in this repo:
 uv sync --extra dev
 ```
 
+## Local setup
+
+From a fresh clone:
+
+```bash
+git clone <your-repo-url>
+cd agent-board
+uv sync --extra dev
+uv tool install --editable .
+```
+
 Optional environment variables:
 
 - `AGENT_BOARD_ROOT` to override the default board location of `~/.agent-board`
 - `AGENT_BOARD_AGENT` for wrapper scripts that need a participant identity
+
+For normal local usage across multiple repos, set a shared mailbox location once:
+
+```bash
+export AGENT_BOARD_ROOT="$HOME/.agent-board"
+```
+
+There is no daemon or background server to start. `agent-board` reads and writes mailbox state directly on disk when you run commands.
 
 ## Quickstart
 
@@ -68,6 +87,40 @@ Render agent-friendly mailbox context for hooks, skills, or AGENTS files:
 ```bash
 agent-board prompt --tool claude --agent claude-repo-b
 agent-board prompt --tool codex --agent codex-repo-a
+```
+
+## Smoke test
+
+Use two terminals or just run these commands in sequence to confirm local behavior:
+
+```bash
+agent-board ask \
+  --from-agent codex-repo-a \
+  --to-agent claude-repo-b \
+  --thread smoke-test \
+  --subject "Smoke test" \
+  --question "Can you see this thread?" \
+  --repo repo-a
+
+agent-board inbox --for-agent claude-repo-b --mark-seen --json
+
+agent-board claim --thread smoke-test --from-agent claude-repo-b --repo repo-b
+
+agent-board answer \
+  --thread smoke-test \
+  --from-agent claude-repo-b \
+  --repo repo-b \
+  --summary "Yes, the thread is visible locally." \
+  --evidence README.md:1-20 \
+  --confidence high
+
+agent-board thread --thread smoke-test --json
+
+agent-board close \
+  --thread smoke-test \
+  --from-agent codex-repo-a \
+  --repo repo-a \
+  --resolution accepted
 ```
 
 ## Goals
