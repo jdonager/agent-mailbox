@@ -5,7 +5,7 @@ from typing import Annotated
 
 import typer
 
-from agent_board.commands import answer, ask, claim, close, cursor, gc, inbox, prompt, thread
+from agent_board.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
 from agent_board.config import load_settings
 
 app = typer.Typer(no_args_is_help=True, help="Filesystem-backed local mailbox for agent handoff.")
@@ -24,6 +24,7 @@ app.command("claim")(claim.command)
 app.command("answer")(answer.command)
 app.command("close")(close.command)
 app.command("cursor")(cursor.command)
+app.command("demo")(demo.command)
 app.command("thread")(thread.command)
 app.command("gc")(gc.command)
 app.command("prompt")(prompt.command)

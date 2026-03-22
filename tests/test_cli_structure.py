@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from agent_board import __main__
 from agent_board.cli import app
-from agent_board.commands import answer, ask, claim, close, cursor, gc, inbox, prompt, thread
+from agent_board.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
 
 
 def test_cli_modules_are_importable_and_registered() -> None:
@@ -14,6 +14,7 @@ def test_cli_modules_are_importable_and_registered() -> None:
     assert thread.command.__name__ == "command"
     assert prompt.command.__name__ == "command"
     assert cursor.command.__name__ == "command"
+    assert demo.command.__name__ == "command"
     assert gc.command.__name__ == "command"
     assert callable(__main__.main)
 
@@ -24,6 +25,7 @@ def test_cli_modules_are_importable_and_registered() -> None:
         "claim",
         "close",
         "cursor",
+        "demo",
         "gc",
         "inbox",
         "prompt",
