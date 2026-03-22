@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AGENT_BOARD_AGENT=claude-repo-b agent-board-adapter-claude-session-start"
+          }
+        ]
+      }
+    ]
+  }
+}

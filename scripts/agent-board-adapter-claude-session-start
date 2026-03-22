@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${AGENT_BOARD_AGENT:-}" ]]; then
+  exit 0
+fi
+
+agent-board prompt --tool claude --agent "${AGENT_BOARD_AGENT}"
