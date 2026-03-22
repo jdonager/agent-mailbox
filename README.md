@@ -18,10 +18,29 @@ For local development in this repo:
 uv sync --extra dev
 ```
 
+## Local setup
+
+From a fresh clone:
+
+```bash
+git clone <your-repo-url>
+cd agent-board
+uv sync --extra dev
+uv tool install --editable .
+```
+
 Optional environment variables:
 
 - `AGENT_BOARD_ROOT` to override the default board location of `~/.agent-board`
 - `AGENT_BOARD_AGENT` for wrapper scripts that need a participant identity
+
+For normal local usage across multiple repos, set a shared mailbox location once:
+
+```bash
+export AGENT_BOARD_ROOT="$HOME/.agent-board"
+```
+
+There is no daemon or background server to start. `agent-board` reads and writes mailbox state directly on disk when you run commands.
 
 ## Quickstart
 
@@ -68,6 +87,94 @@ Render agent-friendly mailbox context for hooks, skills, or AGENTS files:
 ```bash
 agent-board prompt --tool claude --agent claude-repo-b
 agent-board prompt --tool codex --agent codex-repo-a
+```
+
+Print a ready-made two-terminal walkthrough:
+
+```bash
+agent-board demo
+```
+
+## Smoke test
+
+Use two terminals or just run these commands in sequence to confirm local behavior:
+
+```bash
+agent-board ask \
+  --from-agent codex-repo-a \
+  --to-agent claude-repo-b \
+  --thread smoke-test \
+  --subject "Smoke test" \
+  --question "Can you see this thread?" \
+  --repo repo-a
+
+agent-board inbox --for-agent claude-repo-b --mark-seen --json
+
+agent-board claim --thread smoke-test --from-agent claude-repo-b --repo repo-b
+
+agent-board answer \
+  --thread smoke-test \
+  --from-agent claude-repo-b \
+  --repo repo-b \
+  --summary "Yes, the thread is visible locally." \
+  --evidence README.md:1-20 \
+  --confidence high
+
+agent-board thread --thread smoke-test --json
+
+agent-board close \
+  --thread smoke-test \
+  --from-agent codex-repo-a \
+  --repo repo-a \
+  --resolution accepted
+```
+
+## End-to-end demo
+
+If you want a clearer cross-repo walkthrough, use two terminals and two repo directories:
+
+```bash
+# Terminal 1
+cd /path/to/repo-a
+agent-board ask \
+  --from-agent codex-repo-a \
+  --to-agent claude-repo-b \
+  --thread cross-repo-demo \
+  --subject "Cross-repo question" \
+  --question "Where is the relevant logic?" \
+  --repo repo-a
+
+# Terminal 2
+cd /path/to/repo-b
+agent-board inbox --for-agent claude-repo-b --mark-seen --json
+agent-board claim --thread cross-repo-demo --from-agent claude-repo-b --repo repo-b
+agent-board answer \
+  --thread cross-repo-demo \
+  --from-agent claude-repo-b \
+  --repo repo-b \
+  --summary "The logic lives in src/example.py." \
+  --evidence src/example.py:10-42 \
+  --confidence high
+
+# Terminal 1
+cd /path/to/repo-a
+agent-board thread --thread cross-repo-demo --json
+agent-board close \
+  --thread cross-repo-demo \
+  --from-agent codex-repo-a \
+  --repo repo-a \
+  --resolution accepted
+```
+
+To print a version of that walkthrough from the CLI:
+
+```bash
+agent-board demo \
+  --repo-a-path /path/to/repo-a \
+  --repo-b-path /path/to/repo-b \
+  --agent-a codex-repo-a \
+  --agent-b claude-repo-b \
+  --thread cross-repo-demo
 ```
 
 ## Goals
@@ -361,6 +468,7 @@ agent-board answer
 agent-board close
 agent-board thread
 agent-board cursor
+agent-board demo
 agent-board prompt
 agent-board gc
 ```
@@ -436,6 +544,15 @@ Inspect or clear a participant cursor.
 ```bash
 agent-board cursor --for-agent claude-repo-b --json
 agent-board cursor --for-agent claude-repo-b --clear --json
+```
+
+### demo
+
+Print a two-terminal walkthrough you can adapt for your own repo paths and agent names.
+
+```bash
+agent-board demo
+agent-board demo --repo-a-path /path/to/repo-a --repo-b-path /path/to/repo-b
 ```
 
 ### prompt
