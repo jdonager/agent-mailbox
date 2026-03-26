@@ -117,7 +117,7 @@ See `~/.agent-mailbox/config.json` for TTL, archive, and size limit settings.
 - **TTL-based expiration** — stale questions and claims expire automatically
 - **Cursor tracking** — per-agent read state powers unread detection
 
-For event schemas, thread lifecycle rules, and architecture details, see `docs/plans/`.
+For event schemas, thread lifecycle rules, and architecture details, see [`docs/architecture.md`](docs/architecture.md).
 
 ## License
 
