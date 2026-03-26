@@ -1,11 +1,4 @@
-<p align="center">
-
-```
-█▀█ █▀▀ █▀▀ █▄░█ ▀█▀   █▀▄▀█ █▀█ █ █░░ █▄▄ █▀█ ▀▄▀
-█▀█ █▄█ ██▄ █░▀█ ░█░   █░▀░█ █▀█ █ █▄▄ █▄█ █▄█ █░█
-```
-
-</p>
+<h1 align="center"><b>agent-mailbox</b></h1>
 
 <p align="center">
   <img src="assets/mailbox_ai_agents.webp" alt="Agent Mailbox" width="600">
