@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="assets/mailbox_ai_agents.png" alt="Agent Mailbox" width="400">
+  <img src="assets/mailbox_ai_agents.jpg" alt="Agent Mailbox" width="400">
 </p>
 
 # agent-mailbox
 
 Targeted knowledge transfer between agent sessions — so one session doesn't have to rediscover what another already knows.
 
-Each agent session builds deep context as it works: codebase understanding, bug investigations, design decisions, integration discoveries. That context is trapped in the session that earned it. When a different agent session — working a different repo, a different problem — needs that knowledge, it shouldn't have to spelunk through unfamiliar code and re-derive what's already known.
+Each agent session builds deep context as it works: codebase understanding, bug investigations, design decisions, integration discoveries. That context is trapped in the session that earned it. `agent-mailbox` lets a different session tap that knowledge directly instead of re-deriving it from scratch.
 
 `agent-mailbox` is a local, filesystem-backed mailbox that lets agent sessions ask targeted questions, claim responsibility, post evidence-backed answers, and close threads. No redundant exploration, no context loss across session boundaries.
 
