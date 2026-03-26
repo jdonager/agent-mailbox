@@ -9,10 +9,10 @@ from pydantic import BaseModel, Field
 
 class Settings(BaseModel):
     board_root: Path = Field(default_factory=lambda: Path("~/.agent-mailbox").expanduser())
-    default_question_ttl_seconds: int = 1800
-    default_claim_ttl_seconds: int = 600
-    default_answer_ttl_seconds: int = 86400
-    default_close_ttl_seconds: int = 86400
+    default_question_ttl_seconds: int | None = None
+    default_claim_ttl_seconds: int | None = None
+    default_answer_ttl_seconds: int | None = None
+    default_close_ttl_seconds: int | None = None
     archive_closed_after_days: int = 7
     archive_expired_after_days: int = 3
     prune_archived_after_days: int | None = 30

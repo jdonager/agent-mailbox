@@ -65,6 +65,25 @@ def test_question_subject_must_be_120_chars_or_less() -> None:
         )
 
 
+def test_event_with_no_ttl_never_expires() -> None:
+    event = Event.model_validate(
+        {
+            "id": "01TESTEVENT",
+            "type": "question",
+            "thread_id": "repo-b-jwt-kid-validation",
+            "from": {"agent": "codex-repo-a", "repo": "repo-a"},
+            "to": {"agent": "claude-repo-b", "repo": "repo-b"},
+            "created_at": "2026-03-21T13:00:00Z",
+            "schema_version": 1,
+            "body": {"subject": "Question", "question": "Where?"},
+        }
+    )
+
+    assert event.ttl_seconds is None
+    assert event.expires_at() is None
+    assert event.is_expired(datetime(2099, 12, 31, tzinfo=UTC)) is False
+
+
 def test_thread_id_must_be_80_chars_or_less() -> None:
     with pytest.raises(ValueError):
         build_question_event(

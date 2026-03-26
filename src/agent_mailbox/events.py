@@ -38,7 +38,7 @@ def build_question_event(
     subject: str,
     question: str,
     repo: str,
-    ttl_seconds: int,
+    ttl_seconds: int | None = None,
     branch: str | None = None,
     commit: str | None = None,
     to_repo: str | None = None,
@@ -80,13 +80,13 @@ def build_claim_event(
     in_reply_to: str,
     from_agent: str,
     repo: str,
-    ttl_seconds: int,
+    ttl_seconds: int | None = None,
     branch: str | None = None,
     commit: str | None = None,
     note: str | None = None,
 ) -> Event:
     created_at = utc_now()
-    expires_at = created_at + timedelta(seconds=ttl_seconds)
+    expires_at = (created_at + timedelta(seconds=ttl_seconds)) if ttl_seconds is not None else None
     return Event.model_validate(
         {
             "id": generate_event_id(),
@@ -102,7 +102,7 @@ def build_claim_event(
             "created_at": format_timestamp(created_at),
             "ttl_seconds": ttl_seconds,
             "body": {
-                "claim_expires_at": format_timestamp(expires_at),
+                "claim_expires_at": format_timestamp(expires_at) if expires_at else None,
                 "note": note,
             },
         }
@@ -118,7 +118,7 @@ def build_answer_event(
     summary: str,
     evidence: list[str],
     confidence: str,
-    ttl_seconds: int,
+    ttl_seconds: int | None = None,
     branch: str | None = None,
     commit: str | None = None,
     stale_risk: str = "low",
@@ -156,7 +156,7 @@ def build_close_event(
     from_agent: str,
     repo: str,
     resolution: str,
-    ttl_seconds: int,
+    ttl_seconds: int | None = None,
     branch: str | None = None,
     commit: str | None = None,
     note: str | None = None,

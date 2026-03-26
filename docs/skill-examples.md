@@ -133,6 +133,7 @@ If you are blocked on a question another repo can answer, create a thread with:
 - a specific target agent
 - a precise question
 - the current repo identity
+- optionally, --ttl <seconds> if the question should expire (default: no expiration)
 Avoid vague asks like "help with auth" or "check this repo".
 ```
 

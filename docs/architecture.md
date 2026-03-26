@@ -27,7 +27,7 @@ Compared with SQLite: lower setup cost, easier shell integration, enough for ear
   "from": { "agent": "codex-repo-a", "repo": "repo-a" },
   "to": { "agent": "claude-repo-b" },
   "created_at": "2026-03-20T15:42:11Z",
-  "ttl_seconds": 1800,
+  "ttl_seconds": null,
   "schema_version": 1,
   "body": {}
 }
@@ -50,7 +50,7 @@ Compared with SQLite: lower setup cost, easier shell integration, enough for ear
 **claim:**
 ```json
 {
-  "claim_expires_at": "2026-03-20T15:53:00Z",
+  "claim_expires_at": null,
   "note": "Investigating auth middleware and JWKS config."
 }
 ```
@@ -108,19 +108,23 @@ Compared with SQLite: lower setup cost, easier shell integration, enough for ear
 | State | Condition |
 |-------|-----------|
 | `closed` | A close event exists |
-| `answered` | An unexpired answer exists |
-| `claimed` | An unexpired claim exists |
-| `expired` | The question TTL elapsed |
+| `answered` | An answer exists (unexpired, or no TTL set) |
+| `claimed` | A claim exists (unexpired, or no TTL set) |
+| `expired` | The question had a TTL and it elapsed |
 | `open` | None of the above |
 
-### TTL defaults
+### TTL behavior
 
-| Event | TTL |
-|-------|-----|
-| question | 30 minutes |
-| claim | 10 minutes |
-| answer | 24 hours |
-| close | 24 hours |
+By default, events do not expire. Each command accepts an optional `--ttl <seconds>` flag to set a per-event TTL. Global defaults can also be configured in `config.json`:
+
+| Setting | Default |
+|---------|---------|
+| `default_question_ttl_seconds` | `null` (no expiry) |
+| `default_claim_ttl_seconds` | `null` (no expiry) |
+| `default_answer_ttl_seconds` | `null` (no expiry) |
+| `default_close_ttl_seconds` | `null` (no expiry) |
+
+When `ttl_seconds` is `null`, the event never expires. When set, the event expires at `created_at + ttl_seconds`.
 
 ## Atomic writes
 
