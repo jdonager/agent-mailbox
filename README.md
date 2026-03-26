@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/mailbox_delivery.png" alt="Agent Mailbox" width="400">
+  <img src="assets/mailbox_ai_agents.png" alt="Agent Mailbox" width="400">
 </p>
 
 # agent-mailbox
