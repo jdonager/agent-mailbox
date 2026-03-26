@@ -30,7 +30,7 @@ class Event(BaseModel):
     from_participant: Participant = Field(alias="from")
     to: Participant | None = None
     created_at: str
-    ttl_seconds: int
+    ttl_seconds: int | None = None
     schema_version: int = 1
     body: dict[str, Any]
     in_reply_to: str | None = None
@@ -45,10 +45,14 @@ class Event(BaseModel):
     def created_datetime(self) -> datetime:
         return datetime.fromisoformat(self.created_at.replace("Z", "+00:00"))
 
-    def expires_at(self) -> datetime:
+    def expires_at(self) -> datetime | None:
+        if self.ttl_seconds is None:
+            return None
         return self.created_datetime() + timedelta(seconds=self.ttl_seconds)
 
     def is_expired(self, now: datetime | None = None) -> bool:
+        if self.ttl_seconds is None:
+            return False
         reference = now or datetime.now(UTC)
         return self.expires_at() <= reference
 

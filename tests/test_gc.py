@@ -51,7 +51,7 @@ def test_gc_archives_closed_and_expired_threads() -> None:
             subject="Old closed",
             question="Question",
             repo="repo-a",
-            ttl_seconds=settings.default_question_ttl_seconds,
+            ttl_seconds=86400,
         ).model_copy(update={"created_at": old})
         storage.write_event(closed_question)
         closed_close = build_close_event(
@@ -60,7 +60,7 @@ def test_gc_archives_closed_and_expired_threads() -> None:
             from_agent="codex-repo-a",
             repo="repo-a",
             resolution="accepted",
-            ttl_seconds=settings.default_close_ttl_seconds,
+            ttl_seconds=86400,
         ).model_copy(update={"created_at": old})
         storage.write_event(closed_close)
 
@@ -82,7 +82,7 @@ def test_gc_archives_closed_and_expired_threads() -> None:
             subject="Recent active",
             question="Question",
             repo="repo-a",
-            ttl_seconds=settings.default_answer_ttl_seconds,
+            ttl_seconds=86400,
         )
         storage.write_event(active_question)
 

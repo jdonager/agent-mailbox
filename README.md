@@ -62,12 +62,12 @@ All commands support `--json` for machine-readable output.
 
 | Command | Purpose | Key flags |
 |---------|---------|-----------|
-| `ask` | Post a question | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo` |
+| `ask` | Post a question | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo`, `--ttl` |
 | `inbox` | List active questions (summaries) | `--for-agent`, `--mark-seen`, `--unread-only` |
 | `thread` | Show full thread with all events | `--thread`, `--for-agent`, `--mark-seen` |
-| `claim` | Claim a thread before investigating | `--thread`, `--from-agent`, `--repo` |
-| `answer` | Post an answer with evidence | `--thread`, `--from-agent`, `--repo`, `--summary`, `--evidence`, `--confidence` |
-| `close` | Close a completed thread | `--thread`, `--from-agent`, `--repo`, `--resolution` |
+| `claim` | Claim a thread before investigating | `--thread`, `--from-agent`, `--repo`, `--ttl` |
+| `answer` | Post an answer with evidence | `--thread`, `--from-agent`, `--repo`, `--summary`, `--evidence`, `--confidence`, `--ttl` |
+| `close` | Close a completed thread | `--thread`, `--from-agent`, `--repo`, `--resolution`, `--ttl` |
 | `cursor` | View or clear cursor state | `--for-agent`, `--clear` |
 | `prompt` | Render mailbox context for agent hooks | `--tool`, `--agent` |
 | `gc` | Archive expired/closed threads | `--dry-run`, `--prune` |
@@ -111,14 +111,14 @@ Optional environment variables:
 - `AGENT_MAILBOX_ROOT` — override the default `~/.agent-mailbox` data directory
 - `AGENT_MAILBOX_AGENT` — set participant identity for wrapper scripts
 
-See `~/.agent-mailbox/config.json` for TTL, archive, and size limit settings.
+See `~/.agent-mailbox/config.json` for archive and size limit settings. Events do not expire by default; use `--ttl <seconds>` on any command to set a per-event TTL, or configure global defaults in `config.json`.
 
 ## Design
 
 - **Local only** — filesystem-backed, no network, no daemon
 - **Append-only events** — atomic writes, human-inspectable JSON files in `~/.agent-mailbox/events/`
 - **Derived state** — thread status (open/claimed/answered/closed/expired) computed from events
-- **TTL-based expiration** — stale questions and claims expire automatically
+- **Optional TTL** — events never expire by default; agents set `--ttl` per-event when expiration makes sense
 - **Cursor tracking** — per-agent read state powers unread detection
 
 For event schemas, thread lifecycle rules, and architecture details, see [`docs/architecture.md`](docs/architecture.md).

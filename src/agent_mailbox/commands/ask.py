@@ -18,10 +18,12 @@ def command(
     repo: Annotated[str, typer.Option("--repo")],
     branch: Annotated[str | None, typer.Option("--branch")] = None,
     commit: Annotated[str | None, typer.Option("--commit")] = None,
+    ttl: Annotated[int | None, typer.Option("--ttl", help="TTL in seconds; omit for no expiration")] = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     settings = get_settings(context)
     storage = get_storage(context)
+    effective_ttl = ttl if ttl is not None else settings.default_question_ttl_seconds
     event = build_question_event(
         thread_id=thread,
         from_agent=from_agent,
@@ -29,7 +31,7 @@ def command(
         subject=subject,
         question=question,
         repo=repo,
-        ttl_seconds=settings.default_question_ttl_seconds,
+        ttl_seconds=effective_ttl,
         branch=branch,
         commit=commit,
     )

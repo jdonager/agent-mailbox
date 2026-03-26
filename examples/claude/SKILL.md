@@ -42,12 +42,12 @@ All commands support `--json` for machine-readable output.
 
 | Command | Purpose | Key flags |
 |---------|---------|-----------|
-| `ask` | Create a question event | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo` |
+| `ask` | Create a question event | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo`, `--ttl` |
 | `inbox` | List active questions for an agent | `--for-agent <agent>`, `--mark-seen`, `--unread-only`, `--json` |
 | `thread` | Show full thread details and all events | `--thread <id>`, `--for-agent <agent>`, `--mark-seen`, `--json` |
-| `claim` | Claim a thread before investigating | `--thread`, `--from-agent`, `--repo` |
-| `answer` | Post an answer with evidence | `--thread`, `--from-agent`, `--repo`, `--summary`, `--evidence`, `--confidence` |
-| `close` | Close a completed thread | `--thread`, `--from-agent`, `--repo`, `--resolution` |
+| `claim` | Claim a thread before investigating | `--thread`, `--from-agent`, `--repo`, `--ttl` |
+| `answer` | Post an answer with evidence | `--thread`, `--from-agent`, `--repo`, `--summary`, `--evidence`, `--confidence`, `--ttl` |
+| `close` | Close a completed thread | `--thread`, `--from-agent`, `--repo`, `--resolution`, `--ttl` |
 | `cursor` | View or manage cursor state | `--for-agent <agent>`, `--clear`, `--json` |
 | `prompt` | Get injected mailbox context | `--tool claude`, `--agent <agent-id>` |
 | `gc` | Garbage-collect expired threads | (no required flags) |

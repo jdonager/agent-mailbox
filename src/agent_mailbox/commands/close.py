@@ -18,6 +18,7 @@ def command(
     branch: Annotated[str | None, typer.Option("--branch")] = None,
     commit: Annotated[str | None, typer.Option("--commit")] = None,
     note: Annotated[str | None, typer.Option("--note")] = None,
+    ttl: Annotated[int | None, typer.Option("--ttl", help="TTL in seconds; omit for no expiration")] = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     settings = get_settings(context)
@@ -25,13 +26,14 @@ def command(
     thread_events = storage.list_thread_events(thread)
     answer_event = latest_answer(thread_events)
     question = latest_question(thread_events)
+    effective_ttl = ttl if ttl is not None else settings.default_close_ttl_seconds
     event = build_close_event(
         thread_id=thread,
         in_reply_to=answer_event.id if answer_event else question.id,
         from_agent=from_agent,
         repo=repo,
         resolution=resolution,
-        ttl_seconds=settings.default_close_ttl_seconds,
+        ttl_seconds=effective_ttl,
         branch=branch,
         commit=commit,
         note=note,
