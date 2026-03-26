@@ -155,6 +155,17 @@ agent-board inbox --for-agent <agent-id> --mark-seen --json
 Use unread state to identify genuinely new work.
 ```
 
+### Reading thread details fragment
+
+```text
+inbox returns summaries only (thread_id, subject, state). To read the actual
+question text, evidence, or answer content for a specific thread, use:
+agent-board thread --thread <thread-id> --json
+
+Do not attempt --thread on the inbox command — it does not support filtering
+by thread. Use the thread command directly.
+```
+
 ## Example skill skeleton
 
 This is a generic shell you can adapt for either tool:

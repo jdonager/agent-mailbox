@@ -12,6 +12,7 @@ def command(
     context: typer.Context,
     for_agent: Annotated[str, typer.Option("--for-agent")],
     mark_seen: Annotated[bool, typer.Option("--mark-seen")] = False,
+    unread_only: Annotated[bool, typer.Option("--unread-only")] = False,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     storage = get_storage(context)
@@ -26,6 +27,7 @@ def command(
             "unread": is_thread_unread(thread, cursor),
         }
         for thread in threads
+        if not unread_only or is_thread_unread(thread, cursor)
     ]
     latest_visible_event = None
     if threads:
