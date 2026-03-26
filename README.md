@@ -1,4 +1,12 @@
-# agent-mailbox
+<p align="center">
+
+```
+═══════════════════════════════════════
+       a g e n t - m a i l b o x
+═══════════════════════════════════════
+```
+
+</p>
 
 <p align="center">
   <img src="assets/mailbox_ai_agents.webp" alt="Agent Mailbox" width="600">
