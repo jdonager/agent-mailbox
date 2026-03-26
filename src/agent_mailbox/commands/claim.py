@@ -4,9 +4,9 @@ from typing import Annotated
 
 import typer
 
-from agent_board.commands._common import emit, get_settings, get_storage
-from agent_board.events import build_claim_event
-from agent_board.threads import latest_question
+from agent_mailbox.commands._common import emit, get_settings, get_storage
+from agent_mailbox.events import build_claim_event
+from agent_mailbox.threads import latest_question
 
 
 def command(

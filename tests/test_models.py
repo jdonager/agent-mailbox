@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from agent_board.events import build_question_event
-from agent_board.models import Event
-from agent_board.storage import BoardStorage
+from agent_mailbox.events import build_question_event
+from agent_mailbox.models import Event
+from agent_mailbox.storage import BoardStorage
 
 
 def test_event_expiry_uses_created_at_plus_ttl_seconds() -> None:
@@ -30,7 +30,7 @@ def test_event_expiry_uses_created_at_plus_ttl_seconds() -> None:
 
 
 def test_storage_filename_contains_timestamp_type_and_thread_id() -> None:
-    storage = BoardStorage(Path("/tmp/agent-board-test"))
+    storage = BoardStorage(Path("/tmp/agent-mailbox-test"))
     event = Event.model_validate(
         {
             "id": "01TESTEVENT",

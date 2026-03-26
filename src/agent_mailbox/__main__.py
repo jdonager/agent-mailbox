@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from agent_board.cli import app
+from agent_mailbox.cli import app
 
 
 def main() -> None:

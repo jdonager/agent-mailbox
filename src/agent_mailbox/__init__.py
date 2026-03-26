@@ -1,4 +1,4 @@
-"""agent-board package."""
+"""agent-mailbox package."""
 
 __all__ = ["__version__"]
 

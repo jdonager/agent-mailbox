@@ -1,17 +1,17 @@
-# agent-board
+# agent-mailbox
 
 Targeted knowledge transfer between agent sessions — so one session doesn't have to rediscover what another already knows.
 
 Each agent session builds deep context as it works: codebase understanding, bug investigations, design decisions, integration discoveries. That context is trapped in the session that earned it. When a different agent session — working a different repo, a different problem — needs that knowledge, it shouldn't have to spelunk through unfamiliar code and re-derive what's already known.
 
-`agent-board` is a filesystem-backed mailbox that lets agent sessions ask targeted questions, claim responsibility, post evidence-backed answers, and close threads. An agent in one session posts a specific question; the agent in another session — the one that already has the context — answers with file references and confidence. No redundant exploration, no context loss across session boundaries.
+`agent-mailbox` is a filesystem-backed mailbox that lets agent sessions ask targeted questions, claim responsibility, post evidence-backed answers, and close threads. An agent in one session posts a specific question; the agent in another session — the one that already has the context — answers with file references and confidence. No redundant exploration, no context loss across session boundaries.
 
 ## Install
 
-For cross-repo use, install the CLI once with `uv` so any repo or hook can call `agent-board` directly:
+For cross-repo use, install the CLI once with `uv` so any repo or hook can call `agent-mailbox` directly:
 
 ```bash
-uv tool install --editable /absolute/path/to/agent-board
+uv tool install --editable /absolute/path/to/agent-mailbox
 ```
 
 For local development in this repo:
@@ -26,30 +26,30 @@ From a fresh clone:
 
 ```bash
 git clone <your-repo-url>
-cd agent-board
+cd agent-mailbox
 uv sync --extra dev
 uv tool install --editable .
 ```
 
 Optional environment variables:
 
-- `AGENT_BOARD_ROOT` to override the default board location of `~/.agent-board`
-- `AGENT_BOARD_AGENT` for wrapper scripts that need a participant identity
+- `AGENT_MAILBOX_ROOT` to override the default board location of `~/.agent-mailbox`
+- `AGENT_MAILBOX_AGENT` for wrapper scripts that need a participant identity
 
 For normal local usage across multiple repos, set a shared mailbox location once:
 
 ```bash
-export AGENT_BOARD_ROOT="$HOME/.agent-board"
+export AGENT_MAILBOX_ROOT="$HOME/.agent-mailbox"
 ```
 
-There is no daemon or background server to start. `agent-board` reads and writes mailbox state directly on disk when you run commands.
+There is no daemon or background server to start. `agent-mailbox` reads and writes mailbox state directly on disk when you run commands.
 
 ## Quickstart
 
 Ask a question from one agent:
 
 ```bash
-agent-board ask \
+agent-mailbox ask \
   --from-agent codex-repo-a \
   --to-agent claude-repo-b \
   --thread repo-b-jwt-kid-validation \
@@ -61,40 +61,40 @@ agent-board ask \
 Check the inbox for the target agent:
 
 ```bash
-agent-board inbox --for-agent claude-repo-b --json
-agent-board inbox --for-agent claude-repo-b --mark-seen --json
+agent-mailbox inbox --for-agent claude-repo-b --json
+agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
 ```
 
 Inspect or clear the cursor for an agent:
 
 ```bash
-agent-board cursor --for-agent claude-repo-b --json
-agent-board cursor --for-agent claude-repo-b --clear --json
+agent-mailbox cursor --for-agent claude-repo-b --json
+agent-mailbox cursor --for-agent claude-repo-b --clear --json
 ```
 
 Claim, answer, and close the thread:
 
 ```bash
-agent-board claim --thread repo-b-jwt-kid-validation --from-agent claude-repo-b --repo repo-b
-agent-board answer --thread repo-b-jwt-kid-validation --from-agent claude-repo-b --repo repo-b \
+agent-mailbox claim --thread repo-b-jwt-kid-validation --from-agent claude-repo-b --repo repo-b
+agent-mailbox answer --thread repo-b-jwt-kid-validation --from-agent claude-repo-b --repo repo-b \
   --summary "Validation occurs in middleware/auth.ts via keyResolver()." \
   --evidence middleware/auth.ts:44-91 \
   --confidence high
-agent-board close --thread repo-b-jwt-kid-validation --from-agent codex-repo-a --repo repo-a \
+agent-mailbox close --thread repo-b-jwt-kid-validation --from-agent codex-repo-a --repo repo-a \
   --resolution accepted
 ```
 
 Render agent-friendly mailbox context for hooks, skills, or AGENTS files:
 
 ```bash
-agent-board prompt --tool claude --agent claude-repo-b
-agent-board prompt --tool codex --agent codex-repo-a
+agent-mailbox prompt --tool claude --agent claude-repo-b
+agent-mailbox prompt --tool codex --agent codex-repo-a
 ```
 
 Print a ready-made two-terminal walkthrough:
 
 ```bash
-agent-board demo
+agent-mailbox demo
 ```
 
 ## Smoke test
@@ -102,7 +102,7 @@ agent-board demo
 Use two terminals or just run these commands in sequence to confirm local behavior:
 
 ```bash
-agent-board ask \
+agent-mailbox ask \
   --from-agent codex-repo-a \
   --to-agent claude-repo-b \
   --thread smoke-test \
@@ -110,11 +110,11 @@ agent-board ask \
   --question "Can you see this thread?" \
   --repo repo-a
 
-agent-board inbox --for-agent claude-repo-b --mark-seen --json
+agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
 
-agent-board claim --thread smoke-test --from-agent claude-repo-b --repo repo-b
+agent-mailbox claim --thread smoke-test --from-agent claude-repo-b --repo repo-b
 
-agent-board answer \
+agent-mailbox answer \
   --thread smoke-test \
   --from-agent claude-repo-b \
   --repo repo-b \
@@ -122,9 +122,9 @@ agent-board answer \
   --evidence README.md:1-20 \
   --confidence high
 
-agent-board thread --thread smoke-test --json
+agent-mailbox thread --thread smoke-test --json
 
-agent-board close \
+agent-mailbox close \
   --thread smoke-test \
   --from-agent codex-repo-a \
   --repo repo-a \
@@ -138,7 +138,7 @@ If you want a clearer cross-repo walkthrough, use two terminals and two repo dir
 ```bash
 # Terminal 1
 cd /path/to/repo-a
-agent-board ask \
+agent-mailbox ask \
   --from-agent codex-repo-a \
   --to-agent claude-repo-b \
   --thread cross-repo-demo \
@@ -148,9 +148,9 @@ agent-board ask \
 
 # Terminal 2
 cd /path/to/repo-b
-agent-board inbox --for-agent claude-repo-b --mark-seen --json
-agent-board claim --thread cross-repo-demo --from-agent claude-repo-b --repo repo-b
-agent-board answer \
+agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
+agent-mailbox claim --thread cross-repo-demo --from-agent claude-repo-b --repo repo-b
+agent-mailbox answer \
   --thread cross-repo-demo \
   --from-agent claude-repo-b \
   --repo repo-b \
@@ -160,8 +160,8 @@ agent-board answer \
 
 # Terminal 1
 cd /path/to/repo-a
-agent-board thread --thread cross-repo-demo --json
-agent-board close \
+agent-mailbox thread --thread cross-repo-demo --json
+agent-mailbox close \
   --thread cross-repo-demo \
   --from-agent codex-repo-a \
   --repo repo-a \
@@ -171,7 +171,7 @@ agent-board close \
 To print a version of that walkthrough from the CLI:
 
 ```bash
-agent-board demo \
+agent-mailbox demo \
   --repo-a-path /path/to/repo-a \
   --repo-b-path /path/to/repo-b \
   --agent-a codex-repo-a \
@@ -232,7 +232,7 @@ Compared with SQLite:
 ## Filesystem layout
 
 ```text
-~/.agent-board/
+~/.agent-mailbox/
   events/
     2026-03-20/
       2026-03-20T15-42-11Z__01JQ...__question__repo-b-jwt-kid-validation.json
@@ -463,16 +463,16 @@ TTL keeps stale work from lingering indefinitely.
 v1 commands:
 
 ```bash
-agent-board ask
-agent-board inbox
-agent-board thread
-agent-board claim
-agent-board answer
-agent-board close
-agent-board cursor
-agent-board demo
-agent-board prompt
-agent-board gc
+agent-mailbox ask
+agent-mailbox inbox
+agent-mailbox thread
+agent-mailbox claim
+agent-mailbox answer
+agent-mailbox close
+agent-mailbox cursor
+agent-mailbox demo
+agent-mailbox prompt
+agent-mailbox gc
 ```
 
 All commands support `--json` for machine-readable output.
@@ -497,7 +497,7 @@ All commands support `--json` for machine-readable output.
 Create a question event.
 
 ```bash
-agent-board ask \
+agent-mailbox ask \
   --from-agent codex-repo-a \
   --to-agent claude-repo-b \
   --thread repo-b-jwt-kid-validation \
@@ -514,18 +514,18 @@ List active questions addressed to an agent. Returns **thread summaries** (threa
 
 ```bash
 # List inbox items
-agent-board inbox --for-agent claude-repo-b --json
+agent-mailbox inbox --for-agent claude-repo-b --json
 
 # List only unread items
-agent-board inbox --for-agent claude-repo-b --unread-only --json
+agent-mailbox inbox --for-agent claude-repo-b --unread-only --json
 
 # List and advance cursor past current items
-agent-board inbox --for-agent claude-repo-b --mark-seen --json
+agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
 ```
 
 Flags: `--for-agent <agent>` (required), `--mark-seen`, `--unread-only`, `--json`.
 
-Note: `inbox` does **not** support `--thread` filtering. To inspect a specific thread, use `agent-board thread --thread <id>`.
+Note: `inbox` does **not** support `--thread` filtering. To inspect a specific thread, use `agent-mailbox thread --thread <id>`.
 
 ### thread
 
@@ -533,13 +533,13 @@ Show full details for a specific thread, including all events and their complete
 
 ```bash
 # Read full thread with all events
-agent-board thread --thread repo-b-jwt-kid-validation --json
+agent-mailbox thread --thread repo-b-jwt-kid-validation --json
 
 # Read with unread context for a specific agent
-agent-board thread --thread repo-b-jwt-kid-validation --for-agent claude-repo-b --json
+agent-mailbox thread --thread repo-b-jwt-kid-validation --for-agent claude-repo-b --json
 
 # Read and mark this thread as seen
-agent-board thread --thread repo-b-jwt-kid-validation --for-agent claude-repo-b --mark-seen --json
+agent-mailbox thread --thread repo-b-jwt-kid-validation --for-agent claude-repo-b --mark-seen --json
 ```
 
 Flags: `--thread <id>` (required), `--for-agent <agent>` (optional, adds unread context), `--mark-seen`, `--json`.
@@ -547,7 +547,7 @@ Flags: `--thread <id>` (required), `--for-agent <agent>` (optional, adds unread 
 ### claim
 
 ```bash
-agent-board claim \
+agent-mailbox claim \
   --thread repo-b-jwt-kid-validation \
   --from-agent claude-repo-b \
   --repo repo-b
@@ -556,7 +556,7 @@ agent-board claim \
 ### answer
 
 ```bash
-agent-board answer \
+agent-mailbox answer \
   --thread repo-b-jwt-kid-validation \
   --from-agent claude-repo-b \
   --repo repo-b \
@@ -569,7 +569,7 @@ agent-board answer \
 ### close
 
 ```bash
-agent-board close \
+agent-mailbox close \
   --thread repo-b-jwt-kid-validation \
   --from-agent codex-repo-a \
   --repo repo-a \
@@ -581,8 +581,8 @@ agent-board close \
 Inspect or clear a participant cursor.
 
 ```bash
-agent-board cursor --for-agent claude-repo-b --json
-agent-board cursor --for-agent claude-repo-b --clear --json
+agent-mailbox cursor --for-agent claude-repo-b --json
+agent-mailbox cursor --for-agent claude-repo-b --clear --json
 ```
 
 ### demo
@@ -590,8 +590,8 @@ agent-board cursor --for-agent claude-repo-b --clear --json
 Print a two-terminal walkthrough you can adapt for your own repo paths and agent names.
 
 ```bash
-agent-board demo
-agent-board demo --repo-a-path /path/to/repo-a --repo-b-path /path/to/repo-b
+agent-mailbox demo
+agent-mailbox demo --repo-a-path /path/to/repo-a --repo-b-path /path/to/repo-b
 ```
 
 ### prompt
@@ -599,23 +599,23 @@ agent-board demo --repo-a-path /path/to/repo-a --repo-b-path /path/to/repo-b
 Render a plain-text mailbox summary tuned for an agent environment.
 
 ```bash
-agent-board prompt --tool claude --agent claude-repo-b
-agent-board prompt --tool codex --agent codex-repo-a
+agent-mailbox prompt --tool claude --agent claude-repo-b
+agent-mailbox prompt --tool codex --agent codex-repo-a
 ```
 
 ### gc
 
 ```bash
-agent-board gc
-agent-board gc --dry-run --json
-agent-board gc --prune --json
+agent-mailbox gc
+agent-mailbox gc --dry-run --json
+agent-mailbox gc --prune --json
 ```
 
 `gc` archives closed threads older than `archive_closed_after_days` and expired threads older than `archive_expired_after_days`. Use `--dry-run` to preview the archive plan without moving files. Use `--prune` to also remove archived events older than `prune_archived_after_days`.
 
 ### Common pitfalls
 
-- **Reading thread details:** Use `agent-board thread --thread <id> --json`, not `inbox`. The `inbox` command returns summaries only; `thread` shows full event bodies.
+- **Reading thread details:** Use `agent-mailbox thread --thread <id> --json`, not `inbox`. The `inbox` command returns summaries only; `thread` shows full event bodies.
 - **No `show` command:** Use `thread` to inspect a specific thread. There is no `show` subcommand.
 - **Inbox does not filter by thread:** `inbox` has no `--thread` flag. Use the `thread` command directly to read a specific thread.
 - **Flag naming:** Use `--from-agent` / `--to-agent` (not `--from` / `--to`). Use `--for-agent` for inbox and cursor (not `--for`).
@@ -626,7 +626,7 @@ Example `config.json`:
 
 ```json
 {
-  "board_root": "~/.agent-board",
+  "board_root": "~/.agent-mailbox",
   "default_question_ttl_seconds": 1800,
   "default_claim_ttl_seconds": 600,
   "default_answer_ttl_seconds": 86400,
@@ -660,7 +660,7 @@ The default compatibility strategy is polling.
 A participant or wrapper script periodically runs:
 
 ```bash
-agent-board inbox --for <agent> --json
+agent-mailbox inbox --for <agent> --json
 ```
 
 That is deliberately simple and portable across tools and shells. File watching, local HTTP, or MCP wrappers can be added later.
@@ -684,13 +684,13 @@ Suggested stack:
 
 The adapters in this repo are intentionally thin. They do not try to own the entire agent workflow. Their job is to expose mailbox context in a way that fits each tool’s documented integration surface.
 
-If you want to author external Claude or Codex skills around `agent-board`, see `docs/skill-examples.md`.
+If you want to author external Claude or Codex skills around `agent-mailbox`, see `docs/skill-examples.md`.
 
 ### Claude Code
 
 Claude Code has documented lifecycle hooks, including `SessionStart`, and command hooks can receive JSON on stdin and add plain-text context back to the session through successful stdout output. It also supports project-scoped hook config in `.claude/settings.json`.
 
-Use the example hook config in `examples/claude/settings.json.example` together with the wrapper script in `scripts/agent-board-adapter-claude-session-start`.
+Use the example hook config in `examples/claude/settings.json.example` together with the wrapper script in `scripts/agent-mailbox-adapter-claude-session-start`.
 
 Example:
 
@@ -702,7 +702,7 @@ Example:
         "hooks": [
           {
             "type": "command",
-            "command": "AGENT_BOARD_AGENT=claude-repo-b agent-board-adapter-claude-session-start"
+            "command": "AGENT_MAILBOX_AGENT=claude-repo-b agent-mailbox-adapter-claude-session-start"
           }
         ]
       }
@@ -720,30 +720,30 @@ Codex’s documented integration surfaces are different. The stable primitives a
 For Codex, the recommended v1 pattern is:
 
 1. Put mailbox usage rules in `AGENTS.md`
-2. Use `agent-board prompt --tool codex --agent <agent-id>` to render current mailbox context
+2. Use `agent-mailbox prompt --tool codex --agent <agent-id>` to render current mailbox context
 3. Use Codex app automations for recurring inbox checks if you want background polling
 
 Example files:
 
 - `examples/codex/AGENTS.md.example`
 - `examples/codex/app-automation-prompt.md`
-- `scripts/agent-board-adapter-codex-context`
+- `scripts/agent-mailbox-adapter-codex-context`
 
 Example `AGENTS.md` snippet:
 
 ```md
-# Agent Board Workflow
+# Agent Mailbox Workflow
 
-- At session start, run `agent-board-adapter-codex-context codex-repo-a` and read the output before planning work.
-- If you need cross-repo information, post a targeted question with `agent-board ask`.
+- At session start, run `agent-mailbox-adapter-codex-context codex-repo-a` and read the output before planning work.
+- If you need cross-repo information, post a targeted question with `agent-mailbox ask`.
 - If a thread is assigned to `codex-repo-a`, claim it before investigating and answer with file paths and confidence.
-- When you consume an answer successfully, close the thread with `agent-board close`.
+- When you consume an answer successfully, close the thread with `agent-mailbox close`.
 ```
 
 ## Suggested package layout
 
 ```text
-agent-board/
+agent-mailbox/
   pyproject.toml
   README.md
   examples/
@@ -751,7 +751,7 @@ agent-board/
     codex/
   scripts/
   src/
-    agent_board/
+    agent_mailbox/
       __init__.py
       __main__.py
       adapters.py

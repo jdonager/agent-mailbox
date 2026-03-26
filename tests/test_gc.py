@@ -6,10 +6,10 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from agent_board.cli import app
-from agent_board.config import load_settings
-from agent_board.events import build_close_event, build_question_event
-from agent_board.storage import BoardStorage
+from agent_mailbox.cli import app
+from agent_mailbox.config import load_settings
+from agent_mailbox.events import build_close_event, build_question_event
+from agent_mailbox.storage import BoardStorage
 
 runner = CliRunner()
 
@@ -203,6 +203,6 @@ def test_gc_human_output_is_readable() -> None:
             ["--board-root", str(board_root), "gc", "--dry-run"],
         )
         assert result.exit_code == 0
-        assert "agent-board gc" in result.stdout
+        assert "agent-mailbox gc" in result.stdout
         assert "expired-thread" in result.stdout
         assert "Dry run only" in result.stdout

@@ -4,9 +4,9 @@ from typing import Annotated
 
 import typer
 
-from agent_board.adapters import AdapterTool, render_prompt
-from agent_board.commands._common import get_storage
-from agent_board.threads import build_inbox
+from agent_mailbox.adapters import AdapterTool, render_prompt
+from agent_mailbox.commands._common import get_storage
+from agent_mailbox.threads import build_inbox
 
 
 def command(

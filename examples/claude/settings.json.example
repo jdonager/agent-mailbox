@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "AGENT_BOARD_AGENT=claude-repo-b agent-board-adapter-claude-session-start"
+            "command": "AGENT_MAILBOX_AGENT=claude-repo-b agent-mailbox-adapter-claude-session-start"
           }
         ]
       }

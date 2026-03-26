@@ -5,8 +5,8 @@ from typing import Annotated
 
 import typer
 
-from agent_board.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
-from agent_board.config import load_settings
+from agent_mailbox.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
+from agent_mailbox.config import load_settings
 
 app = typer.Typer(no_args_is_help=True, help="Filesystem-backed local mailbox for agent handoff.")
 

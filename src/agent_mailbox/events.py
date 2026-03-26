@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 
 import ulid
 
-from agent_board.models import Event, EvidenceRef, Participant
+from agent_mailbox.models import Event, EvidenceRef, Participant
 
 
 def utc_now() -> datetime:

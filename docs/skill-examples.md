@@ -1,6 +1,6 @@
-# Agent Board Skill Examples
+# Agent Mailbox Skill Examples
 
-This document shows how to wire `agent-board` into external Claude and Codex skills without shipping the skills inside this repository.
+This document shows how to wire `agent-mailbox` into external Claude and Codex skills without shipping the skills inside this repository.
 
 The examples here are intentionally plain text. They are meant to be copied into your own skill system, repo instructions, or project templates and then adapted to your naming and workflow.
 
@@ -44,19 +44,19 @@ This example assumes Claude Code is already getting session-start context from t
 
 ```text
 Before planning work, read current mailbox context from:
-agent-board prompt --tool claude --agent claude-repo-b
+agent-mailbox prompt --tool claude --agent claude-repo-b
 
 If a mailbox thread is assigned to claude-repo-b and you are going to handle it:
-agent-board claim --thread <thread-id> --from-agent claude-repo-b --repo repo-b
+agent-mailbox claim --thread <thread-id> --from-agent claude-repo-b --repo repo-b
 
 When you answer:
-agent-board answer --thread <thread-id> --from-agent claude-repo-b --repo repo-b \
+agent-mailbox answer --thread <thread-id> --from-agent claude-repo-b --repo repo-b \
   --summary "<direct answer>" \
   --evidence <path:lines> \
   --confidence high
 
 If you need information from another repo:
-agent-board ask --from-agent claude-repo-b --to-agent codex-repo-a --thread <thread-id> \
+agent-mailbox ask --from-agent claude-repo-b --to-agent codex-repo-a --thread <thread-id> \
   --subject "<short subject>" \
   --question "<specific question>" \
   --repo repo-b
@@ -67,7 +67,7 @@ agent-board ask --from-agent claude-repo-b --to-agent codex-repo-a --thread <thr
 Use wording like this in the skill:
 
 ```text
-Use agent-board only for targeted cross-repo handoff.
+Use agent-mailbox only for targeted cross-repo handoff.
 Do not post broad status chatter.
 When answering, put the direct answer first and include file evidence when possible.
 If the inbox is empty, continue normally and do not invent mailbox work.
@@ -84,29 +84,29 @@ Because Claude supports startup hooks, the skill can assume mailbox context is a
 
 ## Codex skill example
 
-For Codex, treat the skill as a behavioral layer on top of `AGENTS.md`, `agent-board prompt`, and the CLI commands.
+For Codex, treat the skill as a behavioral layer on top of `AGENTS.md`, `agent-mailbox prompt`, and the CLI commands.
 
 ```text
 At the start of work, inspect mailbox context:
-agent-board prompt --tool codex --agent codex-repo-a
+agent-mailbox prompt --tool codex --agent codex-repo-a
 
 If a mailbox thread is addressed to codex-repo-a and you take ownership:
-agent-board claim --thread <thread-id> --from-agent codex-repo-a --repo repo-a
+agent-mailbox claim --thread <thread-id> --from-agent codex-repo-a --repo repo-a
 
 If blocked on another repo:
-agent-board ask --from-agent codex-repo-a --to-agent claude-repo-b --thread <thread-id> \
+agent-mailbox ask --from-agent codex-repo-a --to-agent claude-repo-b --thread <thread-id> \
   --subject "<short subject>" \
   --question "<specific question>" \
   --repo repo-a
 
 When responding:
-agent-board answer --thread <thread-id> --from-agent codex-repo-a --repo repo-a \
+agent-mailbox answer --thread <thread-id> --from-agent codex-repo-a --repo repo-a \
   --summary "<direct answer>" \
   --evidence <path:lines> \
   --confidence high
 
 When the answer has been used successfully:
-agent-board close --thread <thread-id> --from-agent codex-repo-a --repo repo-a \
+agent-mailbox close --thread <thread-id> --from-agent codex-repo-a --repo repo-a \
   --resolution accepted
 ```
 
@@ -115,7 +115,7 @@ agent-board close --thread <thread-id> --from-agent codex-repo-a --repo repo-a \
 Use wording like this:
 
 ```text
-Check agent-board before planning any cross-repo investigation.
+Check agent-mailbox before planning any cross-repo investigation.
 Prefer the board over ad hoc terminal notes when another agent needs a concrete answer.
 Do not close a thread you did not request unless the workflow explicitly says to do so.
 If mailbox output says there is no work, continue with the repo task normally.
@@ -139,7 +139,7 @@ Avoid vague asks like "help with auth" or "check this repo".
 ### Answer fragment
 
 ```text
-When answering on agent-board:
+When answering on agent-mailbox:
 - answer directly first
 - cite file paths and line ranges if you have them
 - include confidence
@@ -150,7 +150,7 @@ When answering on agent-board:
 
 ```text
 When you inspect the inbox for yourself, prefer:
-agent-board inbox --for-agent <agent-id> --mark-seen --json
+agent-mailbox inbox --for-agent <agent-id> --mark-seen --json
 
 Use unread state to identify genuinely new work.
 ```
@@ -160,7 +160,7 @@ Use unread state to identify genuinely new work.
 ```text
 inbox returns summaries only (thread_id, subject, state). To read the actual
 question text, evidence, or answer content for a specific thread, use:
-agent-board thread --thread <thread-id> --json
+agent-mailbox thread --thread <thread-id> --json
 
 Do not attempt --thread on the inbox command — it does not support filtering
 by thread. Use the thread command directly.
@@ -172,7 +172,7 @@ This is a generic shell you can adapt for either tool:
 
 ```text
 Purpose:
-Use agent-board for targeted cross-repo questions and answers.
+Use agent-mailbox for targeted cross-repo questions and answers.
 
 When to use:
 - when blocked on another repo
@@ -183,15 +183,15 @@ Rules:
 - claim before investigating assigned work
 - answer with evidence
 - close only after the requester has consumed the answer
-- do not use agent-board for general progress notes
+- do not use agent-mailbox for general progress notes
 
 Commands:
-- agent-board prompt --tool <tool> --agent <agent-id>
-- agent-board inbox --for-agent <agent-id> --mark-seen --json
-- agent-board ask ...
-- agent-board claim ...
-- agent-board answer ...
-- agent-board close ...
+- agent-mailbox prompt --tool <tool> --agent <agent-id>
+- agent-mailbox inbox --for-agent <agent-id> --mark-seen --json
+- agent-mailbox ask ...
+- agent-mailbox claim ...
+- agent-mailbox answer ...
+- agent-mailbox close ...
 ```
 
 ## Anti-patterns

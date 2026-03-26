@@ -1,4 +1,4 @@
-# Agent Board V1 Implementation Plan
+# Agent Mailbox V1 Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -13,13 +13,13 @@
 ### Task 1: Project Skeleton
 
 **Files:**
-- Create: `src/agent_board/__init__.py`
-- Create: `src/agent_board/cli.py`
-- Create: `src/agent_board/config.py`
-- Create: `src/agent_board/models.py`
-- Create: `src/agent_board/storage.py`
-- Create: `src/agent_board/events.py`
-- Create: `src/agent_board/threads.py`
+- Create: `src/agent_mailbox/__init__.py`
+- Create: `src/agent_mailbox/cli.py`
+- Create: `src/agent_mailbox/config.py`
+- Create: `src/agent_mailbox/models.py`
+- Create: `src/agent_mailbox/storage.py`
+- Create: `src/agent_mailbox/events.py`
+- Create: `src/agent_mailbox/threads.py`
 - Create: `tests/test_cli_flow.py`
 - Create: `.gitignore`
 
@@ -53,7 +53,7 @@ Expected: PASS
 
 ```bash
 git add .
-git commit -m "feat: scaffold agent-board v1 cli"
+git commit -m "feat: scaffold agent-mailbox v1 cli"
 ```
 
 ### Task 2: Verification and Polish
@@ -88,5 +88,5 @@ Expected: PASS
 
 ```bash
 git add .
-git commit -m "test: cover agent-board event validation"
+git commit -m "test: cover agent-mailbox event validation"
 ```

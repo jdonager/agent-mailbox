@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class Settings(BaseModel):
-    board_root: Path = Field(default_factory=lambda: Path("~/.agent-board").expanduser())
+    board_root: Path = Field(default_factory=lambda: Path("~/.agent-mailbox").expanduser())
     default_question_ttl_seconds: int = 1800
     default_claim_ttl_seconds: int = 600
     default_answer_ttl_seconds: int = 86400
@@ -20,7 +20,7 @@ class Settings(BaseModel):
 
 
 def load_settings(explicit_board_root: Path | None = None) -> Settings:
-    env_board_root = os.getenv("AGENT_BOARD_ROOT")
+    env_board_root = os.getenv("AGENT_MAILBOX_ROOT")
     board_root = explicit_board_root or (
         Path(env_board_root).expanduser() if env_board_root else None
     )

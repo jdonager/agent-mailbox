@@ -5,7 +5,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from agent_board.cli import app
+from agent_mailbox.cli import app
 
 runner = CliRunner()
 

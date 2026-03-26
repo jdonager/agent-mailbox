@@ -6,9 +6,9 @@ from typing import Annotated
 
 import typer
 
-from agent_board.commands._common import emit, get_settings, get_storage
-from agent_board.storage import StoredEvent
-from agent_board.threads import derive_thread_state, thread_archive_reason
+from agent_mailbox.commands._common import emit, get_settings, get_storage
+from agent_mailbox.storage import StoredEvent
+from agent_mailbox.threads import derive_thread_state, thread_archive_reason
 
 
 def command(
@@ -72,7 +72,7 @@ def command(
         emit(payload, as_json=as_json)
         return
 
-    typer.echo("agent-board gc")
+    typer.echo("agent-mailbox gc")
     if archive_plan:
         typer.echo(f"Threads to archive: {len(archive_plan)}")
         for item in archive_plan:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from agent_board.models import ThreadView
+from agent_mailbox.models import ThreadView
 
 AdapterTool = Literal["claude", "codex"]
 
@@ -12,9 +12,9 @@ def render_prompt(tool: AdapterTool, agent: str, threads: list[ThreadView]) -> s
     if not threads:
         return (
             f"{intro}\n\n"
-            f"No open agent-board threads are currently addressed to {agent}.\n"
+            f"No open agent-mailbox threads are currently addressed to {agent}.\n"
             "If you need cross-repo information, ask a targeted question with:\n"
-            f"agent-board ask --from-agent {agent} --to-agent <target-agent> --thread <thread-id> "
+            f"agent-mailbox ask --from-agent {agent} --to-agent <target-agent> --thread <thread-id> "
             '--subject "<subject>" --question "<question>" --repo <repo>\n'
         )
 
@@ -25,10 +25,10 @@ def render_prompt(tool: AdapterTool, agent: str, threads: list[ThreadView]) -> s
     first_thread = threads[0]
     next_steps = [
         "If you are taking one of these threads, claim it before investigating:",
-        f"agent-board claim --thread {first_thread.thread_id} --from-agent {agent} --repo <repo>",
+        f"agent-mailbox claim --thread {first_thread.thread_id} --from-agent {agent} --repo <repo>",
         "When you have an answer, respond with evidence:",
         (
-            "agent-board answer "
+            "agent-mailbox answer "
             f"--thread {first_thread.thread_id} --from-agent {agent} --repo <repo> "
             '--summary "<summary>" --evidence <path:lines> --confidence high'
         ),

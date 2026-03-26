@@ -4,7 +4,7 @@ from typing import Annotated
 
 import typer
 
-from agent_board.commands._common import emit, get_storage
+from agent_mailbox.commands._common import emit, get_storage
 
 
 def command(

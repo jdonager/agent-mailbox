@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typer.testing import CliRunner
 
-from agent_board.cli import app
+from agent_mailbox.cli import app
 
 runner = CliRunner()
 
@@ -31,8 +31,8 @@ def test_demo_command_prints_two_terminal_walkthrough() -> None:
         assert "Terminal 2" in result.stdout
         assert "cd /tmp/repo-a" in result.stdout
         assert "cd /tmp/repo-b" in result.stdout
-        assert "agent-board ask" in result.stdout
-        assert "agent-board inbox --for-agent claude-repo-b --mark-seen --json" in result.stdout
-        assert "agent-board claim --thread demo-thread" in result.stdout
-        assert "agent-board answer" in result.stdout
-        assert "agent-board close --thread demo-thread" in result.stdout
+        assert "agent-mailbox ask" in result.stdout
+        assert "agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json" in result.stdout
+        assert "agent-mailbox claim --thread demo-thread" in result.stdout
+        assert "agent-mailbox answer" in result.stdout
+        assert "agent-mailbox close --thread demo-thread" in result.stdout

@@ -3,9 +3,9 @@ requires = ["hatchling>=1.24.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agent-board"
+name = "agent-mailbox"
 version = "0.1.0"
-description = "A local-only, filesystem-backed mailbox for cross-repo agent handoff."
+description = "Targeted knowledge transfer between agent sessions — so one session doesn't have to rediscover what another already knows."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -47,15 +47,15 @@ dev = [
 ]
 
 [project.scripts]
-agent-board = "agent_board.cli:app"
+agent-mailbox = "agent_mailbox.cli:app"
 
 [project.urls]
-Homepage = "https://example.com/agent-board"
-Repository = "https://example.com/agent-board.git"
-Issues = "https://example.com/agent-board/issues"
+Homepage = "https://example.com/agent-mailbox"
+Repository = "https://example.com/agent-mailbox.git"
+Issues = "https://example.com/agent-mailbox/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/agent_board"]
+packages = ["src/agent_mailbox"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -87,7 +87,7 @@ strict_equality = true
 mypy_path = "src"
 
 [tool.coverage.run]
-source = ["agent_board"]
+source = ["agent_mailbox"]
 branch = true
 
 [tool.coverage.report]
