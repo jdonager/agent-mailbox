@@ -15,12 +15,12 @@ def command(
     thread: Annotated[str, typer.Option("--thread")] = "demo-thread",
 ) -> None:
     lines = [
-        "agent-board end-to-end demo",
+        "agent-mailbox end-to-end demo",
         "",
         "Terminal 1",
         f"cd {repo_a_path}",
         (
-            "agent-board ask "
+            "agent-mailbox ask "
             f"--from-agent {agent_a} --to-agent {agent_b} --thread {thread} "
             '--subject "Cross-repo question" '
             '--question "Where is the relevant logic?" '
@@ -29,10 +29,10 @@ def command(
         "",
         "Terminal 2",
         f"cd {repo_b_path}",
-        f"agent-board inbox --for-agent {agent_b} --mark-seen --json",
-        f"agent-board claim --thread {thread} --from-agent {agent_b} --repo {repo_b_name}",
+        f"agent-mailbox inbox --for-agent {agent_b} --mark-seen --json",
+        f"agent-mailbox claim --thread {thread} --from-agent {agent_b} --repo {repo_b_name}",
         (
-            "agent-board answer "
+            "agent-mailbox answer "
             f"--thread {thread} --from-agent {agent_b} --repo {repo_b_name} "
             '--summary "The logic lives in src/example.py." '
             "--evidence src/example.py:10-42 "
@@ -41,9 +41,9 @@ def command(
         "",
         "Terminal 1",
         f"cd {repo_a_path}",
-        f"agent-board thread --thread {thread} --json",
+        f"agent-mailbox thread --thread {thread} --json",
         (
-            f"agent-board close --thread {thread} --from-agent {agent_a} "
+            f"agent-mailbox close --thread {thread} --from-agent {agent_a} "
             f"--repo {repo_a_name} --resolution accepted"
         ),
     ]

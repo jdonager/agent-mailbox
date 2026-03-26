@@ -4,8 +4,8 @@ from typing import Annotated
 
 import typer
 
-from agent_board.commands._common import emit, get_storage
-from agent_board.threads import build_thread_view, is_thread_unread, latest_event
+from agent_mailbox.commands._common import emit, get_storage
+from agent_mailbox.threads import build_thread_view, is_thread_unread, latest_event
 
 
 def command(

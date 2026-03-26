@@ -1,11 +1,11 @@
 ---
-name: agent-board
-description: Use when working in Claude Code across multiple repos and you need targeted cross-repo handoff, mailbox triage, or a consistent ask/claim/answer/close workflow with agent-board.
+name: agent-mailbox
+description: Use when working in Claude Code across multiple repos and you need targeted cross-repo handoff, mailbox triage, or a consistent ask/claim/answer/close workflow with agent-mailbox.
 ---
 
-# Agent Board
+# Agent Mailbox
 
-Use `agent-board` for narrow cross-repo coordination. Treat it as an ephemeral mailbox for targeted questions and answers, not as a general chat channel or a long-lived memory store.
+Use `agent-mailbox` for narrow cross-repo coordination. Treat it as an ephemeral mailbox for targeted questions and answers, not as a general chat channel or a long-lived memory store.
 
 ## When to use
 
@@ -30,8 +30,8 @@ Examples:
 If mailbox context is not already injected by a Claude hook, inspect it directly:
 
 ```bash
-agent-board prompt --tool claude --agent <agent-id>
-agent-board inbox --for-agent <agent-id> --mark-seen --json
+agent-mailbox prompt --tool claude --agent <agent-id>
+agent-mailbox inbox --for-agent <agent-id> --mark-seen --json
 ```
 
 If the inbox is empty, continue with normal repo work.
@@ -59,13 +59,13 @@ All commands support `--json` for machine-readable output.
 Start by checking for pending work. The `inbox` command lists active questions addressed to your agent:
 
 ```bash
-agent-board inbox --for-agent <agent-id> --json
+agent-mailbox inbox --for-agent <agent-id> --json
 ```
 
 This returns thread summaries (thread_id, subject, status, unread). To read the full contents of a specific thread including all events:
 
 ```bash
-agent-board thread --thread <thread-id> --json
+agent-mailbox thread --thread <thread-id> --json
 ```
 
 The `thread` command shows all events in order (question, claims, answers, closes) with full bodies. This is the command to use when you need the actual question text, evidence, or answer content.
@@ -75,7 +75,7 @@ The `thread` command shows all events in order (question, claims, answers, close
 Use this when another repo or agent needs to answer a specific question:
 
 ```bash
-agent-board ask \
+agent-mailbox ask \
   --from-agent <agent-id> \
   --to-agent <target-agent> \
   --thread <thread-id> \
@@ -89,7 +89,7 @@ agent-board ask \
 If a thread is addressed to the current agent and you are taking it, claim it before investigating:
 
 ```bash
-agent-board claim --thread <thread-id> --from-agent <agent-id> --repo <repo-name>
+agent-mailbox claim --thread <thread-id> --from-agent <agent-id> --repo <repo-name>
 ```
 
 ### Answer
@@ -97,7 +97,7 @@ agent-board claim --thread <thread-id> --from-agent <agent-id> --repo <repo-name
 When responding, answer directly first and include evidence:
 
 ```bash
-agent-board answer \
+agent-mailbox answer \
   --thread <thread-id> \
   --from-agent <agent-id> \
   --repo <repo-name> \
@@ -111,7 +111,7 @@ agent-board answer \
 Close a thread only after the original requester has used the answer:
 
 ```bash
-agent-board close \
+agent-mailbox close \
   --thread <thread-id> \
   --from-agent <agent-id> \
   --repo <repo-name> \
@@ -120,7 +120,7 @@ agent-board close \
 
 ## Common pitfalls
 
-- **Reading thread details:** Use `agent-board thread --thread <id> --json`, not `inbox`. The `inbox` command lists summaries only; `thread` shows full event contents.
+- **Reading thread details:** Use `agent-mailbox thread --thread <id> --json`, not `inbox`. The `inbox` command lists summaries only; `thread` shows full event contents.
 - **Flag names:** Use `--for-agent` for inbox, cursor, and thread. Use `--from-agent` / `--to-agent` for ask.
 - **No `show` command:** Use `thread` to inspect a specific thread's details. There is no `show` subcommand.
 - **Inbox does not filter by thread:** `inbox` has no `--thread` flag. To read a specific thread, use the `thread` command directly.

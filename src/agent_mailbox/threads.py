@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 
-from agent_board.models import CursorState, Event, ThreadState, ThreadView
+from agent_mailbox.models import CursorState, Event, ThreadState, ThreadView
 
 
 def _group_events_by_thread(events: Iterable[Event]) -> dict[str, list[Event]]:

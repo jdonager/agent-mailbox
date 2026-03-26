@@ -4,9 +4,9 @@ from typing import Annotated
 
 import typer
 
-from agent_board.commands._common import emit, get_settings, get_storage
-from agent_board.events import build_answer_event
-from agent_board.threads import latest_question
+from agent_mailbox.commands._common import emit, get_settings, get_storage
+from agent_mailbox.events import build_close_event
+from agent_mailbox.threads import latest_answer, latest_question
 
 
 def command(
@@ -14,28 +14,27 @@ def command(
     thread: Annotated[str, typer.Option("--thread")],
     from_agent: Annotated[str, typer.Option("--from-agent")],
     repo: Annotated[str, typer.Option("--repo")],
-    summary: Annotated[str, typer.Option("--summary")],
-    evidence: Annotated[list[str] | None, typer.Option("--evidence")] = None,
-    confidence: Annotated[str, typer.Option("--confidence")] = "medium",
+    resolution: Annotated[str, typer.Option("--resolution")],
     branch: Annotated[str | None, typer.Option("--branch")] = None,
     commit: Annotated[str | None, typer.Option("--commit")] = None,
+    note: Annotated[str | None, typer.Option("--note")] = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     settings = get_settings(context)
     storage = get_storage(context)
     thread_events = storage.list_thread_events(thread)
+    answer_event = latest_answer(thread_events)
     question = latest_question(thread_events)
-    event = build_answer_event(
+    event = build_close_event(
         thread_id=thread,
-        in_reply_to=question.id,
+        in_reply_to=answer_event.id if answer_event else question.id,
         from_agent=from_agent,
         repo=repo,
-        summary=summary,
-        evidence=evidence or [],
-        confidence=confidence,
-        ttl_seconds=settings.default_answer_ttl_seconds,
+        resolution=resolution,
+        ttl_seconds=settings.default_close_ttl_seconds,
         branch=branch,
         commit=commit,
+        note=note,
     )
     storage.write_event(event)
     emit(event.model_dump(by_alias=True, mode="json", exclude_none=True), as_json=as_json)

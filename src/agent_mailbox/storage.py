@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from agent_board.models import CursorState, Event
+from agent_mailbox.models import CursorState, Event
 
 
 @dataclass(slots=True)

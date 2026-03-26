@@ -1,4 +1,4 @@
-from agent_board.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
+from agent_mailbox.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
 
 __all__ = [
     "answer",

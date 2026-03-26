@@ -4,7 +4,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from agent_board.cli import app
+from agent_mailbox.cli import app
 
 runner = CliRunner()
 
@@ -51,7 +51,7 @@ def test_claude_prompt_includes_active_thread_and_next_steps() -> None:
         assert prompt_result.exit_code == 0
         assert "Agent-board inbox for claude-repo-b" in prompt_result.stdout
         assert "repo-b-config-question" in prompt_result.stdout
-        assert "agent-board claim --thread repo-b-config-question" in prompt_result.stdout
+        assert "agent-mailbox claim --thread repo-b-config-question" in prompt_result.stdout
 
 
 def test_codex_prompt_handles_empty_inbox() -> None:
@@ -72,7 +72,7 @@ def test_codex_prompt_handles_empty_inbox() -> None:
         )
 
         assert prompt_result.exit_code == 0
-        assert "No open agent-board threads are currently addressed to codex-repo-a." in (
+        assert "No open agent-mailbox threads are currently addressed to codex-repo-a." in (
             prompt_result.stdout
         )
-        assert "agent-board ask" in prompt_result.stdout
+        assert "agent-mailbox ask" in prompt_result.stdout

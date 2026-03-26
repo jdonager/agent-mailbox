@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from agent_board import __main__
-from agent_board.cli import app
-from agent_board.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
+from agent_mailbox import __main__
+from agent_mailbox.cli import app
+from agent_mailbox.commands import answer, ask, claim, close, cursor, demo, gc, inbox, prompt, thread
 
 
 def test_cli_modules_are_importable_and_registered() -> None:

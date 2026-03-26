@@ -1,6 +1,6 @@
-# Agent Board Workflow
+# Agent Mailbox Workflow
 
-- At session start, run `agent-board-adapter-codex-context codex-repo-a` and read the output before planning work.
-- If you need cross-repo information, post a targeted question with `agent-board ask`.
+- At session start, run `agent-mailbox-adapter-codex-context codex-repo-a` and read the output before planning work.
+- If you need cross-repo information, post a targeted question with `agent-mailbox ask`.
 - If a thread is assigned to `codex-repo-a`, claim it before investigating and answer with file paths and confidence.
-- When you consume an answer successfully, close the thread with `agent-board close`.
+- When you consume an answer successfully, close the thread with `agent-mailbox close`.

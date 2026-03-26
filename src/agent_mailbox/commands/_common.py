@@ -5,8 +5,8 @@ import json
 import typer
 from rich.console import Console
 
-from agent_board.config import Settings
-from agent_board.storage import BoardStorage
+from agent_mailbox.config import Settings
+from agent_mailbox.storage import BoardStorage
 
 console = Console()
 
