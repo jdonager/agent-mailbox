@@ -4,695 +4,78 @@ Targeted knowledge transfer between agent sessions — so one session doesn't ha
 
 Each agent session builds deep context as it works: codebase understanding, bug investigations, design decisions, integration discoveries. That context is trapped in the session that earned it. When a different agent session — working a different repo, a different problem — needs that knowledge, it shouldn't have to spelunk through unfamiliar code and re-derive what's already known.
 
-`agent-mailbox` is a filesystem-backed mailbox that lets agent sessions ask targeted questions, claim responsibility, post evidence-backed answers, and close threads. An agent in one session posts a specific question; the agent in another session — the one that already has the context — answers with file references and confidence. No redundant exploration, no context loss across session boundaries.
+`agent-mailbox` is a local, filesystem-backed mailbox that lets agent sessions ask targeted questions, claim responsibility, post evidence-backed answers, and close threads. No redundant exploration, no context loss across session boundaries.
 
 ## Install
 
-For cross-repo use, install the CLI once with `uv` so any repo or hook can call `agent-mailbox` directly:
-
 ```bash
-uv tool install --editable /absolute/path/to/agent-mailbox
+uv tool install --editable /path/to/agent-mailbox
 ```
 
-For local development in this repo:
+For development:
 
 ```bash
 uv sync --extra dev
 ```
 
-## Local setup
+No daemon or background server — `agent-mailbox` reads and writes directly on disk.
 
-From a fresh clone:
+## How it works
 
-```bash
-git clone <your-repo-url>
-cd agent-mailbox
-uv sync --extra dev
-uv tool install --editable .
-```
+Each agent/session combination is a participant. The unit isn't "agent" — it's "agent + session context."
 
-Optional environment variables:
-
-- `AGENT_MAILBOX_ROOT` to override the default board location of `~/.agent-mailbox`
-- `AGENT_MAILBOX_AGENT` for wrapper scripts that need a participant identity
-
-For normal local usage across multiple repos, set a shared mailbox location once:
-
-```bash
-export AGENT_MAILBOX_ROOT="$HOME/.agent-mailbox"
-```
-
-There is no daemon or background server to start. `agent-mailbox` reads and writes mailbox state directly on disk when you run commands.
+1. `codex-repo-a` hits a question about behavior in `repo-b` — it could dig in, but another session already knows
+2. `codex-repo-a` posts a targeted question to `claude-repo-b`
+3. `claude-repo-b` — already deep in that codebase — claims the thread, answers with file paths and line ranges
+4. `codex-repo-a` reads the answer and closes the thread — minutes instead of a fresh investigation
 
 ## Quickstart
 
-Ask a question from one agent:
-
 ```bash
+# Ask a question
 agent-mailbox ask \
-  --from-agent codex-repo-a \
-  --to-agent claude-repo-b \
-  --thread repo-b-jwt-kid-validation \
-  --subject "JWT kid validation path" \
+  --from-agent codex-repo-a --to-agent claude-repo-b \
+  --thread repo-b-auth-question \
+  --subject "JWT validation path" \
   --question "How does repo-b validate rotated JWT kid values?" \
   --repo repo-a
-```
 
-Check the inbox for the target agent:
-
-```bash
+# Check inbox
 agent-mailbox inbox --for-agent claude-repo-b --json
-agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
-```
 
-Inspect or clear the cursor for an agent:
-
-```bash
-agent-mailbox cursor --for-agent claude-repo-b --json
-agent-mailbox cursor --for-agent claude-repo-b --clear --json
-```
-
-Claim, answer, and close the thread:
-
-```bash
-agent-mailbox claim --thread repo-b-jwt-kid-validation --from-agent claude-repo-b --repo repo-b
-agent-mailbox answer --thread repo-b-jwt-kid-validation --from-agent claude-repo-b --repo repo-b \
+# Claim, answer, close
+agent-mailbox claim --thread repo-b-auth-question --from-agent claude-repo-b --repo repo-b
+agent-mailbox answer --thread repo-b-auth-question --from-agent claude-repo-b --repo repo-b \
   --summary "Validation occurs in middleware/auth.ts via keyResolver()." \
-  --evidence middleware/auth.ts:44-91 \
-  --confidence high
-agent-mailbox close --thread repo-b-jwt-kid-validation --from-agent codex-repo-a --repo repo-a \
+  --evidence middleware/auth.ts:44-91 --confidence high
+agent-mailbox close --thread repo-b-auth-question --from-agent codex-repo-a --repo repo-a \
   --resolution accepted
 ```
 
-Render agent-friendly mailbox context for hooks, skills, or AGENTS files:
-
-```bash
-agent-mailbox prompt --tool claude --agent claude-repo-b
-agent-mailbox prompt --tool codex --agent codex-repo-a
-```
-
-Print a ready-made two-terminal walkthrough:
-
-```bash
-agent-mailbox demo
-```
-
-## Smoke test
-
-Use two terminals or just run these commands in sequence to confirm local behavior:
-
-```bash
-agent-mailbox ask \
-  --from-agent codex-repo-a \
-  --to-agent claude-repo-b \
-  --thread smoke-test \
-  --subject "Smoke test" \
-  --question "Can you see this thread?" \
-  --repo repo-a
-
-agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
-
-agent-mailbox claim --thread smoke-test --from-agent claude-repo-b --repo repo-b
-
-agent-mailbox answer \
-  --thread smoke-test \
-  --from-agent claude-repo-b \
-  --repo repo-b \
-  --summary "Yes, the thread is visible locally." \
-  --evidence README.md:1-20 \
-  --confidence high
-
-agent-mailbox thread --thread smoke-test --json
-
-agent-mailbox close \
-  --thread smoke-test \
-  --from-agent codex-repo-a \
-  --repo repo-a \
-  --resolution accepted
-```
-
-## End-to-end demo
-
-If you want a clearer cross-repo walkthrough, use two terminals and two repo directories:
-
-```bash
-# Terminal 1
-cd /path/to/repo-a
-agent-mailbox ask \
-  --from-agent codex-repo-a \
-  --to-agent claude-repo-b \
-  --thread cross-repo-demo \
-  --subject "Cross-repo question" \
-  --question "Where is the relevant logic?" \
-  --repo repo-a
-
-# Terminal 2
-cd /path/to/repo-b
-agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
-agent-mailbox claim --thread cross-repo-demo --from-agent claude-repo-b --repo repo-b
-agent-mailbox answer \
-  --thread cross-repo-demo \
-  --from-agent claude-repo-b \
-  --repo repo-b \
-  --summary "The logic lives in src/example.py." \
-  --evidence src/example.py:10-42 \
-  --confidence high
-
-# Terminal 1
-cd /path/to/repo-a
-agent-mailbox thread --thread cross-repo-demo --json
-agent-mailbox close \
-  --thread cross-repo-demo \
-  --from-agent codex-repo-a \
-  --repo repo-a \
-  --resolution accepted
-```
-
-To print a version of that walkthrough from the CLI:
-
-```bash
-agent-mailbox demo \
-  --repo-a-path /path/to/repo-a \
-  --repo-b-path /path/to/repo-b \
-  --agent-a codex-repo-a \
-  --agent-b claude-repo-b \
-  --thread cross-repo-demo
-```
-
-## Goals
-
-- local only
-- lightweight and inspectable
-- safe by default
-- easy to script from any tool
-- no network required
-- no daemon required for v1
-- resilient to concurrent use
-
-## Non-goals
-
-- rich chat UI
-- workflow orchestration platform
-- background job system
-- long-term knowledge base
-- automatic code execution
-- complex auth or permissions
-
-## Mental model
-
-Each agent/session combination is a participant. The unit isn't "agent" — it's "agent + session context." A Claude session deep in repo-b's auth middleware has knowledge that a Codex session working repo-a's token rotation doesn't, and shouldn't have to rebuild.
-
-Example flow:
-
-1. `codex-repo-a` hits a question about JWT validation behavior in `repo-b` — it could dig in, but another session already knows
-2. `codex-repo-a` posts a targeted question to `claude-repo-b`
-3. `claude-repo-b` — already deep in that codebase — claims the thread, investigates with full context, and answers with file paths and line ranges
-4. `codex-repo-a` reads the answer and closes the thread — minutes instead of a fresh investigation
-
-The board is for **targeted knowledge acquisition across session boundaries**, not durable repo instructions. Durable guidance should live in repo docs such as `AGENTS.md` or equivalent.
-
-## v1 architecture
-
-The source of truth is an append-only set of JSON event files on disk.
-
-### Why event files
-
-Compared with a single shared JSON file:
-
-- safer concurrent writes
-- simpler atomic writes
-- easier debugging and manual inspection
-
-Compared with SQLite:
-
-- lower setup cost
-- easier shell integration
-- enough for early usage
-
-## Filesystem layout
-
-```text
-~/.agent-mailbox/
-  events/
-    2026-03-20/
-      2026-03-20T15-42-11Z__01JQ...__question__repo-b-jwt-kid-validation.json
-      2026-03-20T15-43-00Z__01JQ...__claim__repo-b-jwt-kid-validation.json
-      2026-03-20T15-46-30Z__01JQ...__answer__repo-b-jwt-kid-validation.json
-      2026-03-20T15-48-10Z__01JQ...__close__repo-b-jwt-kid-validation.json
-  archive/
-    events/
-  cursors/
-    codex-repo-a.cursor
-    claude-repo-b.cursor
-  attachments/
-  state/
-    threads/
-  logs/
-  config.json
-```
-
-### Notes
-
-- `events/` is the source of truth
-- `archive/events/` stores threads moved out of the active board by `gc`
-- `cursors/` tracks what each participant has seen and powers inbox unread state
-- `attachments/` is optional and can be skipped in v1
-- `state/threads/` may be used for cached derived state later, but not as authoritative data
-
-## Event model
-
-Everything is an event.
-
-### v1 event types
-
-- `question`
-- `claim`
-- `answer`
-- `close`
-
-Possible future event types:
-
-- `cancel`
-- `note`
-
-## Base event envelope
-
-```json
-{
-  "id": "01JQZP7W8Y4YJ4M7J6T4X2N8W2",
-  "type": "question",
-  "thread_id": "repo-b-jwt-kid-validation",
-  "from": {
-    "agent": "codex-repo-a",
-    "repo": "repo-a",
-    "branch": "feature/token-rotation",
-    "commit": "abc1234"
-  },
-  "to": {
-    "agent": "claude-repo-b",
-    "repo": "repo-b"
-  },
-  "created_at": "2026-03-20T15:42:11Z",
-  "ttl_seconds": 1800,
-  "schema_version": 1,
-  "body": {}
-}
-```
-
-## Event shapes
-
-### question
-
-```json
-{
-  "id": "01...",
-  "type": "question",
-  "thread_id": "repo-b-jwt-kid-validation",
-  "from": {
-    "agent": "codex-repo-a",
-    "repo": "repo-a",
-    "branch": "feature/token-rotation",
-    "commit": "abc1234"
-  },
-  "to": {
-    "agent": "claude-repo-b",
-    "repo": "repo-b"
-  },
-  "created_at": "2026-03-20T15:42:11Z",
-  "ttl_seconds": 1800,
-  "schema_version": 1,
-  "body": {
-    "subject": "JWT kid validation path",
-    "question": "How does repo-b validate rotated JWT kid values?",
-    "expected_answer_format": ["summary", "file_paths", "confidence"],
-    "priority": "normal",
-    "refs": [
-      {
-        "repo": "repo-a",
-        "path": "services/auth/rotate.ts"
-      }
-    ],
-    "constraints": {
-      "max_answer_lines": 20,
-      "needs_file_refs": true
-    }
-  }
-}
-```
-
-### claim
-
-```json
-{
-  "id": "01...",
-  "type": "claim",
-  "thread_id": "repo-b-jwt-kid-validation",
-  "in_reply_to": "01...question",
-  "from": {
-    "agent": "claude-repo-b",
-    "repo": "repo-b",
-    "branch": "main",
-    "commit": "def5678"
-  },
-  "created_at": "2026-03-20T15:43:00Z",
-  "ttl_seconds": 600,
-  "schema_version": 1,
-  "body": {
-    "claim_expires_at": "2026-03-20T15:53:00Z",
-    "note": "Investigating auth middleware and JWKS config."
-  }
-}
-```
-
-### answer
-
-```json
-{
-  "id": "01...",
-  "type": "answer",
-  "thread_id": "repo-b-jwt-kid-validation",
-  "in_reply_to": "01...question",
-  "from": {
-    "agent": "claude-repo-b",
-    "repo": "repo-b",
-    "branch": "main",
-    "commit": "def5678"
-  },
-  "created_at": "2026-03-20T15:46:30Z",
-  "ttl_seconds": 86400,
-  "schema_version": 1,
-  "body": {
-    "summary": "Validation occurs in middleware/auth.ts via keyResolver(), which reads JWKS config from config/jwks.ts.",
-    "evidence": [
-      {"path": "middleware/auth.ts", "lines": "44-91"},
-      {"path": "config/jwks.ts", "lines": "1-38"}
-    ],
-    "confidence": "high",
-    "stale_risk": "low",
-    "followups": [
-      "Rotation fallback appears hard-coded to cache TTL of 300s."
-    ]
-  }
-}
-```
-
-### close
-
-```json
-{
-  "id": "01...",
-  "type": "close",
-  "thread_id": "repo-b-jwt-kid-validation",
-  "in_reply_to": "01...answer",
-  "from": {
-    "agent": "codex-repo-a",
-    "repo": "repo-a",
-    "branch": "feature/token-rotation",
-    "commit": "abc1234"
-  },
-  "created_at": "2026-03-20T15:48:10Z",
-  "ttl_seconds": 86400,
-  "schema_version": 1,
-  "body": {
-    "resolution": "accepted",
-    "note": "Used to update token rollover logic."
-  }
-}
-```
-
-## Thread rules
-
-- one thread starts with exactly one `question`
-- zero or more `claim` events are allowed
-- zero or more `answer` events are allowed
-- one `close` ends the thread
-- latest non-expired claim is the active claim
-- the board is append-only; state is derived from events
-
-### Thread states
-
-Derived state is computed from events:
-
-- `open`
-- `claimed`
-- `answered`
-- `closed`
-- `expired`
-
-Suggested resolution logic:
-
-- if a close exists: `closed`
-- else if a valid answer exists: `answered`
-- else if an unexpired claim exists: `claimed`
-- else if the question expired: `expired`
-- else: `open`
-
-## TTL defaults
-
-Suggested v1 defaults:
-
-- question: `1800` seconds
-- claim: `600` seconds
-- answer: `86400` seconds
-- close: `86400` seconds
-
-TTL keeps stale work from lingering indefinitely.
-
-## CLI
-
-v1 commands:
-
-```bash
-agent-mailbox ask
-agent-mailbox inbox
-agent-mailbox thread
-agent-mailbox claim
-agent-mailbox answer
-agent-mailbox close
-agent-mailbox cursor
-agent-mailbox demo
-agent-mailbox prompt
-agent-mailbox gc
-```
+## CLI reference
 
 All commands support `--json` for machine-readable output.
 
-### Quick reference
-
 | Command | Purpose | Key flags |
 |---------|---------|-----------|
-| `ask` | Create a question event | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo` |
-| `inbox` | List active questions for an agent (summaries only) | `--for-agent <agent>`, `--mark-seen`, `--unread-only`, `--json` |
-| `thread` | Show full thread details and all event bodies | `--thread <id>`, `--for-agent <agent>`, `--mark-seen`, `--json` |
+| `ask` | Post a question | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo` |
+| `inbox` | List active questions (summaries) | `--for-agent`, `--mark-seen`, `--unread-only` |
+| `thread` | Show full thread with all events | `--thread`, `--for-agent`, `--mark-seen` |
 | `claim` | Claim a thread before investigating | `--thread`, `--from-agent`, `--repo` |
 | `answer` | Post an answer with evidence | `--thread`, `--from-agent`, `--repo`, `--summary`, `--evidence`, `--confidence` |
 | `close` | Close a completed thread | `--thread`, `--from-agent`, `--repo`, `--resolution` |
-| `cursor` | View or clear cursor state | `--for-agent <agent>`, `--clear`, `--json` |
-| `prompt` | Render agent-friendly mailbox context | `--tool claude\|codex`, `--agent <agent-id>` |
+| `cursor` | View or clear cursor state | `--for-agent`, `--clear` |
+| `prompt` | Render mailbox context for agent hooks | `--tool`, `--agent` |
+| `gc` | Archive expired/closed threads | `--dry-run`, `--prune` |
 | `demo` | Print a two-terminal walkthrough | `--repo-a-path`, `--repo-b-path` |
-| `gc` | Garbage-collect expired/closed threads | `--dry-run`, `--prune`, `--json` |
 
-### ask
+Use `inbox` to list threads, `thread` to read full event bodies. `inbox` shows summaries only.
 
-Create a question event.
-
-```bash
-agent-mailbox ask \
-  --from-agent codex-repo-a \
-  --to-agent claude-repo-b \
-  --thread repo-b-jwt-kid-validation \
-  --subject "JWT kid validation path" \
-  --question "How does repo-b validate rotated JWT kid values?" \
-  --repo repo-a \
-  --branch feature/token-rotation \
-  --commit abc1234
-```
-
-### inbox
-
-List active questions addressed to an agent. Returns **thread summaries** (thread_id, subject, state, unread) but does **not** include full event bodies. To read the actual question text, evidence, or answer content, use the `thread` command.
-
-```bash
-# List inbox items
-agent-mailbox inbox --for-agent claude-repo-b --json
-
-# List only unread items
-agent-mailbox inbox --for-agent claude-repo-b --unread-only --json
-
-# List and advance cursor past current items
-agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json
-```
-
-Flags: `--for-agent <agent>` (required), `--mark-seen`, `--unread-only`, `--json`.
-
-Note: `inbox` does **not** support `--thread` filtering. To inspect a specific thread, use `agent-mailbox thread --thread <id>`.
-
-### thread
-
-Show full details for a specific thread, including all events and their complete bodies. This is the command to use when you need the actual question text, evidence refs, or answer content.
-
-```bash
-# Read full thread with all events
-agent-mailbox thread --thread repo-b-jwt-kid-validation --json
-
-# Read with unread context for a specific agent
-agent-mailbox thread --thread repo-b-jwt-kid-validation --for-agent claude-repo-b --json
-
-# Read and mark this thread as seen
-agent-mailbox thread --thread repo-b-jwt-kid-validation --for-agent claude-repo-b --mark-seen --json
-```
-
-Flags: `--thread <id>` (required), `--for-agent <agent>` (optional, adds unread context), `--mark-seen`, `--json`.
-
-### claim
-
-```bash
-agent-mailbox claim \
-  --thread repo-b-jwt-kid-validation \
-  --from-agent claude-repo-b \
-  --repo repo-b
-```
-
-### answer
-
-```bash
-agent-mailbox answer \
-  --thread repo-b-jwt-kid-validation \
-  --from-agent claude-repo-b \
-  --repo repo-b \
-  --summary "Validation occurs in middleware/auth.ts via keyResolver()" \
-  --evidence middleware/auth.ts:44-91 \
-  --evidence config/jwks.ts:1-38 \
-  --confidence high
-```
-
-### close
-
-```bash
-agent-mailbox close \
-  --thread repo-b-jwt-kid-validation \
-  --from-agent codex-repo-a \
-  --repo repo-a \
-  --resolution accepted
-```
-
-### cursor
-
-Inspect or clear a participant cursor.
-
-```bash
-agent-mailbox cursor --for-agent claude-repo-b --json
-agent-mailbox cursor --for-agent claude-repo-b --clear --json
-```
-
-### demo
-
-Print a two-terminal walkthrough you can adapt for your own repo paths and agent names.
-
-```bash
-agent-mailbox demo
-agent-mailbox demo --repo-a-path /path/to/repo-a --repo-b-path /path/to/repo-b
-```
-
-### prompt
-
-Render a plain-text mailbox summary tuned for an agent environment.
-
-```bash
-agent-mailbox prompt --tool claude --agent claude-repo-b
-agent-mailbox prompt --tool codex --agent codex-repo-a
-```
-
-### gc
-
-```bash
-agent-mailbox gc
-agent-mailbox gc --dry-run --json
-agent-mailbox gc --prune --json
-```
-
-`gc` archives closed threads older than `archive_closed_after_days` and expired threads older than `archive_expired_after_days`. Use `--dry-run` to preview the archive plan without moving files. Use `--prune` to also remove archived events older than `prune_archived_after_days`.
-
-### Common pitfalls
-
-- **Reading thread details:** Use `agent-mailbox thread --thread <id> --json`, not `inbox`. The `inbox` command returns summaries only; `thread` shows full event bodies.
-- **No `show` command:** Use `thread` to inspect a specific thread. There is no `show` subcommand.
-- **Inbox does not filter by thread:** `inbox` has no `--thread` flag. Use the `thread` command directly to read a specific thread.
-- **Flag naming:** Use `--from-agent` / `--to-agent` (not `--from` / `--to`). Use `--for-agent` for inbox and cursor (not `--for`).
-
-## Config
-
-Example `config.json`:
-
-```json
-{
-  "board_root": "~/.agent-mailbox",
-  "default_question_ttl_seconds": 1800,
-  "default_claim_ttl_seconds": 600,
-  "default_answer_ttl_seconds": 86400,
-  "archive_closed_after_days": 7,
-  "archive_expired_after_days": 3,
-  "prune_archived_after_days": 30,
-  "max_event_size_bytes": 32768
-}
-```
-
-## Safety rules
-
-Hard limits for v1:
-
-- max event size: 32 KB
-- max subject length: 120 chars
-- max thread id length: 80 chars
-- max evidence refs per answer: 20
-
-Disallowed in v1:
-
-- automatic execution of commands from event payloads
-- embedding binary data in JSON events
-- storing secrets in event files
-- direct patch transport as message content
-
-## Polling model
-
-The default compatibility strategy is polling.
-
-A participant or wrapper script periodically runs:
-
-```bash
-agent-mailbox inbox --for <agent> --json
-```
-
-That is deliberately simple and portable across tools and shells. File watching, local HTTP, or MCP wrappers can be added later.
-
-## Recommended implementation
-
-Use Python for v1.
-
-Suggested stack:
-
-- Python 3.11+
-- `typer` for CLI
-- `pydantic` for schema validation
-- `rich` for terminal output
-- `ulid-py` for sortable IDs
-- `pytest` for tests
-- `ruff` for linting
-- `mypy` for type checking
-
-## Adapter examples
-
-The adapters in this repo are intentionally thin. They do not try to own the entire agent workflow. Their job is to expose mailbox context in a way that fits each tool’s documented integration surface.
-
-If you want to author external Claude or Codex skills around `agent-mailbox`, see `docs/skill-examples.md`.
+## Tool integration
 
 ### Claude Code
 
-Claude Code has documented lifecycle hooks, including `SessionStart`, and command hooks can receive JSON on stdin and add plain-text context back to the session through successful stdout output. It also supports project-scoped hook config in `.claude/settings.json`.
-
-Use the example hook config in `examples/claude/settings.json.example` together with the wrapper script in `scripts/agent-mailbox-adapter-claude-session-start`.
-
-Example:
+Add a session-start hook to inject mailbox context automatically:
 
 ```json
 {
@@ -711,122 +94,31 @@ Example:
 }
 ```
 
-That setup injects a mailbox summary into the Claude session at startup. It is a good base for a future Claude skill or project rule that standardizes `ask`, `claim`, `answer`, and `close`.
+See `examples/claude/` and `docs/skill-examples.md` for skill authoring guidance.
 
-### Codex CLI and Codex app
+### Codex
 
-Codex’s documented integration surfaces are different. The stable primitives are repo instructions via `AGENTS.md`, non-interactive execution through `codex exec`, and app-level automations. There is not an equivalent documented lifecycle hook surface in the Codex CLI docs today.
+Add mailbox usage rules to `AGENTS.md` and use `agent-mailbox prompt --tool codex --agent <id>` for context. See `examples/codex/` for examples.
 
-For Codex, the recommended v1 pattern is:
+## Configuration
 
-1. Put mailbox usage rules in `AGENTS.md`
-2. Use `agent-mailbox prompt --tool codex --agent <agent-id>` to render current mailbox context
-3. Use Codex app automations for recurring inbox checks if you want background polling
+Optional environment variables:
 
-Example files:
+- `AGENT_MAILBOX_ROOT` — override the default `~/.agent-mailbox` data directory
+- `AGENT_MAILBOX_AGENT` — set participant identity for wrapper scripts
 
-- `examples/codex/AGENTS.md.example`
-- `examples/codex/app-automation-prompt.md`
-- `scripts/agent-mailbox-adapter-codex-context`
+See `~/.agent-mailbox/config.json` for TTL, archive, and size limit settings.
 
-Example `AGENTS.md` snippet:
+## Design
 
-```md
-# Agent Mailbox Workflow
+- **Local only** — filesystem-backed, no network, no daemon
+- **Append-only events** — atomic writes, human-inspectable JSON files in `~/.agent-mailbox/events/`
+- **Derived state** — thread status (open/claimed/answered/closed/expired) computed from events
+- **TTL-based expiration** — stale questions and claims expire automatically
+- **Cursor tracking** — per-agent read state powers unread detection
 
-- At session start, run `agent-mailbox-adapter-codex-context codex-repo-a` and read the output before planning work.
-- If you need cross-repo information, post a targeted question with `agent-mailbox ask`.
-- If a thread is assigned to `codex-repo-a`, claim it before investigating and answer with file paths and confidence.
-- When you consume an answer successfully, close the thread with `agent-mailbox close`.
-```
+For event schemas, thread lifecycle rules, and architecture details, see [`docs/architecture.md`](docs/architecture.md).
 
-## Suggested package layout
+## License
 
-```text
-agent-mailbox/
-  pyproject.toml
-  README.md
-  examples/
-    claude/
-    codex/
-  scripts/
-  src/
-    agent_mailbox/
-      __init__.py
-      __main__.py
-      adapters.py
-      cli.py
-      config.py
-      models.py
-      storage.py
-      events.py
-      threads.py
-      commands/
-        __init__.py
-        _common.py
-        ask.py
-        inbox.py
-        claim.py
-        answer.py
-        close.py
-        thread.py
-        prompt.py
-        gc.py
-      utils/
-        clock.py
-        ids.py
-        io.py
-        validate.py
-  tests/
-    test_adapters.py
-    test_ask.py
-    test_claim.py
-    test_answer.py
-    test_thread_state.py
-    test_concurrency.py
-```
-
-## Atomic write strategy
-
-Event writes should be atomic:
-
-1. serialize JSON to a temp file in the target directory
-2. flush and fsync the temp file
-3. rename the temp file to the final filename
-
-This avoids partial writes and reduces concurrency hazards on normal local filesystems.
-
-## Build order
-
-1. Implement config, models, storage, `ask`, and `thread`
-2. Add `inbox`, `claim`, and thread-state derivation
-3. Add `answer` and `close`
-4. Add `gc`, tests, and JSON output cleanup
-
-## Acceptance criteria for v1
-
-The board is useful when:
-
-- two terminals can exchange a question and answer
-- event writes are atomic
-- inbox shows only active relevant work
-- stale claims expire automatically in derived state
-- answers can cite evidence
-- a closed thread no longer appears in inbox
-- humans can inspect raw files and understand what happened
-
-## Practical advice
-
-There are two common failure modes for a project like this:
-
-1. it grows into an overbuilt platform
-2. message quality is too loose
-
-Keep the implementation small and the message contract strict.
-
-In v1, the contract is the product.
-
-## References
-
-- Claude Code hooks reference: https://code.claude.com/docs/en/hooks
-- OpenAI Codex docs home: https://developers.openai.com/codex
+MIT
