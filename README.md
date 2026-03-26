@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/mailbox_delivery.png" alt="Agent Mailbox" width="400">
+</p>
+
 # agent-mailbox
 
 Targeted knowledge transfer between agent sessions — so one session doesn't have to rediscover what another already knows.
