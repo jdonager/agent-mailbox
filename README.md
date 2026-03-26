@@ -1,8 +1,10 @@
 # agent-board
 
-A local-only, lightweight mailbox for cross-repo agent handoff.
+Targeted knowledge transfer between agent sessions — so one session doesn't have to rediscover what another already knows.
 
-`agent-board` is a filesystem-backed event board that lets separate agent sessions ask targeted questions, claim responsibility, post answers, and close threads. It is designed for the case where you are working across multiple repos under one org umbrella and need a minimal, inspectable way for one agent session to request specific information from another.
+Each agent session builds deep context as it works: codebase understanding, bug investigations, design decisions, integration discoveries. That context is trapped in the session that earned it. When a different agent session — working a different repo, a different problem — needs that knowledge, it shouldn't have to spelunk through unfamiliar code and re-derive what's already known.
+
+`agent-board` is a filesystem-backed mailbox that lets agent sessions ask targeted questions, claim responsibility, post evidence-backed answers, and close threads. An agent in one session posts a specific question; the agent in another session — the one that already has the context — answers with file references and confidence. No redundant exploration, no context loss across session boundaries.
 
 ## Install
 
@@ -198,16 +200,16 @@ agent-board demo \
 
 ## Mental model
 
-Each repo/agent session is a participant.
+Each agent/session combination is a participant. The unit isn't "agent" — it's "agent + session context." A Claude session deep in repo-b's auth middleware has knowledge that a Codex session working repo-a's token rotation doesn't, and shouldn't have to rebuild.
 
 Example flow:
 
-1. `codex-repo-a` asks a question about behavior in `repo-b`
-2. `claude-repo-b` reads the question and claims it
-3. `claude-repo-b` posts an answer with file references
-4. `codex-repo-a` reads the answer and closes the thread
+1. `codex-repo-a` hits a question about JWT validation behavior in `repo-b` — it could dig in, but another session already knows
+2. `codex-repo-a` posts a targeted question to `claude-repo-b`
+3. `claude-repo-b` — already deep in that codebase — claims the thread, investigates with full context, and answers with file paths and line ranges
+4. `codex-repo-a` reads the answer and closes the thread — minutes instead of a fresh investigation
 
-The board is for **ephemeral cross-repo handoff**, not durable repo instructions. Durable guidance should live in repo docs such as `AGENTS.md` or equivalent.
+The board is for **targeted knowledge acquisition across session boundaries**, not durable repo instructions. Durable guidance should live in repo docs such as `AGENTS.md` or equivalent.
 
 ## v1 architecture
 
