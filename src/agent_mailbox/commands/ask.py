@@ -18,6 +18,7 @@ def command(
     repo: Annotated[str, typer.Option("--repo")],
     branch: Annotated[str | None, typer.Option("--branch")] = None,
     commit: Annotated[str | None, typer.Option("--commit")] = None,
+    namespace: Annotated[str | None, typer.Option("--namespace", help="Thread namespace; defaults to --repo value")] = None,
     ttl: Annotated[int | None, typer.Option("--ttl", help="TTL in seconds; omit for no expiration")] = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
@@ -34,6 +35,7 @@ def command(
         ttl_seconds=effective_ttl,
         branch=branch,
         commit=commit,
+        namespace=namespace,
     )
     storage.write_event(event)
     emit(event.model_dump(by_alias=True, mode="json", exclude_none=True), as_json=as_json)

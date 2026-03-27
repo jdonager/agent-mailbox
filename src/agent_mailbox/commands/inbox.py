@@ -11,16 +11,18 @@ from agent_mailbox.threads import build_inbox, is_thread_unread, latest_event
 def command(
     context: typer.Context,
     for_agent: Annotated[str, typer.Option("--for-agent")],
+    namespace: Annotated[str | None, typer.Option("--namespace", help="Filter threads by namespace (e.g. repo name)")] = None,
     mark_seen: Annotated[bool, typer.Option("--mark-seen")] = False,
     unread_only: Annotated[bool, typer.Option("--unread-only")] = False,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     storage = get_storage(context)
-    threads = build_inbox(storage.list_events(), for_agent)
+    threads = build_inbox(storage.list_events(), for_agent, namespace=namespace)
     cursor = storage.load_cursor(for_agent)
     payload_threads = [
         {
             "thread_id": thread.thread_id,
+            "namespace": thread.namespace,
             "state": thread.state,
             "subject": thread.subject,
             "question_id": thread.question_id,

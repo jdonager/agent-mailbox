@@ -29,6 +29,7 @@ def command(
 
     payload: dict[str, object] = {
         "thread_id": view.thread_id,
+        "namespace": view.namespace,
         "state": view.state,
         "subject": view.subject,
         "question_id": view.question_id,

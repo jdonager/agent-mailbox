@@ -42,15 +42,18 @@ def build_question_event(
     branch: str | None = None,
     commit: str | None = None,
     to_repo: str | None = None,
+    namespace: str | None = None,
 ) -> Event:
     if len(subject) > 120:
         raise ValueError("subject must be 120 characters or fewer")
     created_at = utc_now()
+    effective_namespace = namespace if namespace is not None else repo
     return Event.model_validate(
         {
             "id": generate_event_id(),
             "type": "question",
             "thread_id": thread_id,
+            "namespace": effective_namespace,
             "from": Participant(
                 agent=from_agent,
                 repo=repo,
@@ -84,6 +87,7 @@ def build_claim_event(
     branch: str | None = None,
     commit: str | None = None,
     note: str | None = None,
+    namespace: str | None = None,
 ) -> Event:
     created_at = utc_now()
     expires_at = (created_at + timedelta(seconds=ttl_seconds)) if ttl_seconds is not None else None
@@ -92,6 +96,7 @@ def build_claim_event(
             "id": generate_event_id(),
             "type": "claim",
             "thread_id": thread_id,
+            "namespace": namespace,
             "in_reply_to": in_reply_to,
             "from": Participant(
                 agent=from_agent,
@@ -122,6 +127,7 @@ def build_answer_event(
     branch: str | None = None,
     commit: str | None = None,
     stale_risk: str = "low",
+    namespace: str | None = None,
 ) -> Event:
     created_at = utc_now()
     return Event.model_validate(
@@ -129,6 +135,7 @@ def build_answer_event(
             "id": generate_event_id(),
             "type": "answer",
             "thread_id": thread_id,
+            "namespace": namespace,
             "in_reply_to": in_reply_to,
             "from": Participant(
                 agent=from_agent,
@@ -160,6 +167,7 @@ def build_close_event(
     branch: str | None = None,
     commit: str | None = None,
     note: str | None = None,
+    namespace: str | None = None,
 ) -> Event:
     created_at = utc_now()
     return Event.model_validate(
@@ -167,6 +175,7 @@ def build_close_event(
             "id": generate_event_id(),
             "type": "close",
             "thread_id": thread_id,
+            "namespace": namespace,
             "in_reply_to": in_reply_to,
             "from": Participant(
                 agent=from_agent,

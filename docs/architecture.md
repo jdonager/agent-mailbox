@@ -23,7 +23,8 @@ Compared with SQLite: lower setup cost, easier shell integration, enough for ear
 {
   "id": "01JQZP7W8Y4YJ4M7J6T4X2N8W2",
   "type": "question",
-  "thread_id": "repo-b-jwt-kid-validation",
+  "thread_id": "jwt-kid-validation",
+  "namespace": "repo-b",
   "from": { "agent": "codex-repo-a", "repo": "repo-a" },
   "to": { "agent": "claude-repo-b" },
   "created_at": "2026-03-20T15:42:11Z",
@@ -32,6 +33,12 @@ Compared with SQLite: lower setup cost, easier shell integration, enough for ear
   "body": {}
 }
 ```
+
+### Namespace
+
+Every event carries an optional `namespace` field. By convention, namespace is the **repo name** — this gives agents a stable, predictable top-level key for finding their threads. The `ask` command defaults namespace to the `--repo` value when not explicitly set. Subsequent events (`claim`, `answer`, `close`) inherit the namespace from the thread's question event.
+
+Thread IDs must not contain path separators (`/` or `\`). Keep thread IDs as short topic slugs (e.g., `jwt-kid-validation`, `reload-validation`) and let namespace carry the repo context.
 
 ### Event body shapes
 
@@ -134,7 +141,8 @@ Event writes use a temp-file-then-rename strategy: serialize JSON to a temp file
 
 - Max event size: 32 KB
 - Max subject length: 120 chars
-- Max thread ID length: 80 chars
+- Max thread ID length: 80 chars (no `/` or `\` allowed)
+- Max namespace length: 80 chars (alphanumeric, dots, hyphens, underscores)
 - Max evidence refs per answer: 20
 - No automatic execution of commands from payloads
 - No binary data or secrets in events

@@ -42,8 +42,8 @@ All commands support `--json` for machine-readable output.
 
 | Command | Purpose | Key flags |
 |---------|---------|-----------|
-| `ask` | Create a question event | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo`, `--ttl` |
-| `inbox` | List active questions for an agent | `--for-agent <agent>`, `--mark-seen`, `--unread-only`, `--json` |
+| `ask` | Create a question event | `--from-agent`, `--to-agent`, `--thread`, `--subject`, `--question`, `--repo`, `--namespace`, `--ttl` |
+| `inbox` | List active questions for an agent | `--for-agent <agent>`, `--namespace`, `--mark-seen`, `--unread-only`, `--json` |
 | `thread` | Show full thread details and all events | `--thread <id>`, `--for-agent <agent>`, `--mark-seen`, `--json` |
 | `claim` | Claim a thread before investigating | `--thread`, `--from-agent`, `--repo`, `--ttl` |
 | `answer` | Post an answer with evidence | `--thread`, `--from-agent`, `--repo`, `--summary`, `--evidence`, `--confidence`, `--ttl` |
@@ -62,7 +62,13 @@ Start by checking for pending work. The `inbox` command lists active questions a
 agent-mailbox inbox --for-agent <agent-id> --json
 ```
 
-This returns thread summaries (thread_id, subject, status, unread). To read the full contents of a specific thread including all events:
+To narrow to threads in a specific repo namespace:
+
+```bash
+agent-mailbox inbox --for-agent <agent-id> --namespace <repo-name> --json
+```
+
+This returns thread summaries (thread_id, namespace, subject, status, unread). To read the full contents of a specific thread including all events:
 
 ```bash
 agent-mailbox thread --thread <thread-id> --json
@@ -83,6 +89,8 @@ agent-mailbox ask \
   --question "<specific question>" \
   --repo <repo-name>
 ```
+
+The `--repo` value is used as the thread namespace by default. Use `--namespace` to override if needed.
 
 ### Claim
 
@@ -124,6 +132,7 @@ agent-mailbox close \
 - **Flag names:** Use `--for-agent` for inbox, cursor, and thread. Use `--from-agent` / `--to-agent` for ask.
 - **No `show` command:** Use `thread` to inspect a specific thread's details. There is no `show` subcommand.
 - **Inbox does not filter by thread:** `inbox` has no `--thread` flag. To read a specific thread, use the `thread` command directly.
+- **Thread naming:** Use short topic slugs for `--thread` (e.g., `reload-validation`), not repo-prefixed names. The `--namespace` (defaulting to `--repo`) carries the repo context. This makes threads easy to find: agents filter by namespace to see only their repo's threads.
 
 ## Rules
 
