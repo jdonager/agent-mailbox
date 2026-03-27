@@ -37,6 +37,7 @@ def build_thread_view(events: list[Event], now: datetime | None = None) -> Threa
     question = next(event for event in ordered if event.type == "question")
     return ThreadView(
         thread_id=question.thread_id,
+        namespace=question.namespace,
         state=derive_thread_state(ordered, now),
         question_id=question.id,
         to_agent=question.to.agent if question.to else None,
@@ -45,11 +46,18 @@ def build_thread_view(events: list[Event], now: datetime | None = None) -> Threa
     )
 
 
-def build_inbox(events: list[Event], agent: str, now: datetime | None = None) -> list[ThreadView]:
+def build_inbox(
+    events: list[Event],
+    agent: str,
+    now: datetime | None = None,
+    namespace: str | None = None,
+) -> list[ThreadView]:
     inbox_threads: list[ThreadView] = []
     for thread_events in _group_events_by_thread(events).values():
         view = build_thread_view(thread_events, now)
         if view.to_agent != agent:
+            continue
+        if namespace is not None and view.namespace != namespace:
             continue
         if view.state in {"open", "claimed"}:
             inbox_threads.append(view)

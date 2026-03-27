@@ -56,10 +56,15 @@ agent-mailbox answer --thread <thread-id> --from-agent claude-repo-b --repo repo
   --confidence high
 
 If you need information from another repo:
-agent-mailbox ask --from-agent claude-repo-b --to-agent codex-repo-a --thread <thread-id> \
+agent-mailbox ask --from-agent claude-repo-b --to-agent codex-repo-a \
+  --thread <thread-id> \
   --subject "<short subject>" \
   --question "<specific question>" \
   --repo repo-b
+
+The --repo value is used as the thread namespace by default. To filter your
+inbox to a specific repo's threads:
+agent-mailbox inbox --for-agent claude-repo-b --namespace repo-b --json
 ```
 
 ### Claude skill guidance
@@ -94,7 +99,8 @@ If a mailbox thread is addressed to codex-repo-a and you take ownership:
 agent-mailbox claim --thread <thread-id> --from-agent codex-repo-a --repo repo-a
 
 If blocked on another repo:
-agent-mailbox ask --from-agent codex-repo-a --to-agent claude-repo-b --thread <thread-id> \
+agent-mailbox ask --from-agent codex-repo-a --to-agent claude-repo-b \
+  --thread <thread-id> \
   --subject "<short subject>" \
   --question "<specific question>" \
   --repo repo-a
@@ -108,6 +114,9 @@ agent-mailbox answer --thread <thread-id> --from-agent codex-repo-a --repo repo-
 When the answer has been used successfully:
 agent-mailbox close --thread <thread-id> --from-agent codex-repo-a --repo repo-a \
   --resolution accepted
+
+To filter your inbox to threads in a specific repo namespace:
+agent-mailbox inbox --for-agent codex-repo-a --namespace repo-a --json
 ```
 
 ### Codex skill guidance
@@ -132,7 +141,8 @@ If you are blocked on a question another repo can answer, create a thread with:
 - a specific subject
 - a specific target agent
 - a precise question
-- the current repo identity
+- the current repo identity (--repo sets the thread namespace by default)
+- optionally, --namespace to override the default namespace
 - optionally, --ttl <seconds> if the question should expire (default: no expiration)
 Avoid vague asks like "help with auth" or "check this repo".
 ```
@@ -152,6 +162,9 @@ When answering on agent-mailbox:
 ```text
 When you inspect the inbox for yourself, prefer:
 agent-mailbox inbox --for-agent <agent-id> --mark-seen --json
+
+To narrow to a specific repo's threads:
+agent-mailbox inbox --for-agent <agent-id> --namespace <repo-name> --json
 
 Use unread state to identify genuinely new work.
 ```

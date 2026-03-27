@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
+import re
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 EventType = Literal["question", "claim", "answer", "close"]
@@ -27,6 +29,7 @@ class Event(BaseModel):
     id: str
     type: EventType
     thread_id: str
+    namespace: str | None = None
     from_participant: Participant = Field(alias="from")
     to: Participant | None = None
     created_at: str
@@ -40,6 +43,21 @@ class Event(BaseModel):
     def validate_thread_id(cls, value: str) -> str:
         if len(value) > 80:
             raise ValueError("thread_id must be 80 characters or fewer")
+        if "/" in value or "\\" in value:
+            raise ValueError("thread_id must not contain path separators (/ or \\)")
+        return value
+
+    @field_validator("namespace")
+    @classmethod
+    def validate_namespace(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if not re.match(r"^[a-zA-Z0-9][a-zA-Z0-9._-]*$", value):
+            raise ValueError(
+                "namespace must contain only alphanumeric characters, dots, hyphens, and underscores"
+            )
+        if len(value) > 80:
+            raise ValueError("namespace must be 80 characters or fewer")
         return value
 
     def created_datetime(self) -> datetime:
@@ -59,6 +77,7 @@ class Event(BaseModel):
 
 class ThreadView(BaseModel):
     thread_id: str
+    namespace: str | None = None
     state: ThreadState
     question_id: str
     to_agent: str | None = None

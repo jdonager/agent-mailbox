@@ -19,7 +19,7 @@ def render_prompt(tool: AdapterTool, agent: str, threads: list[ThreadView]) -> s
         )
 
     thread_lines = [
-        f"- {thread.thread_id}: {thread.subject or '(no subject)'} [{thread.state}]"
+        f"- {thread.thread_id} (ns:{thread.namespace or 'none'}): {thread.subject or '(no subject)'} [{thread.state}]"
         for thread in threads
     ]
     first_thread = threads[0]

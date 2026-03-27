@@ -6,7 +6,7 @@ import typer
 
 from agent_mailbox.commands._common import emit, get_settings, get_storage
 from agent_mailbox.events import build_answer_event
-from agent_mailbox.threads import latest_question
+from agent_mailbox.threads import build_thread_view, latest_question
 
 
 def command(
@@ -26,6 +26,7 @@ def command(
     storage = get_storage(context)
     thread_events = storage.list_thread_events(thread)
     question = latest_question(thread_events)
+    thread_view = build_thread_view(thread_events)
     effective_ttl = ttl if ttl is not None else settings.default_answer_ttl_seconds
     event = build_answer_event(
         thread_id=thread,
@@ -38,6 +39,7 @@ def command(
         ttl_seconds=effective_ttl,
         branch=branch,
         commit=commit,
+        namespace=thread_view.namespace,
     )
     storage.write_event(event)
     emit(event.model_dump(by_alias=True, mode="json", exclude_none=True), as_json=as_json)
