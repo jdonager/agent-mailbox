@@ -43,8 +43,8 @@ The board should not become a scratchpad, project log, or long-form memory syste
 This example assumes Claude Code is already getting session-start context from the wrapper script:
 
 ```text
-Before planning work, read current mailbox context from:
-agent-mailbox prompt --tool claude --agent claude-repo-b
+Before planning work, check your inbox filtered to this repo:
+agent-mailbox inbox --for-agent claude-repo-b --namespace repo-b --mark-seen --json
 
 If a mailbox thread is assigned to claude-repo-b and you are going to handle it:
 agent-mailbox claim --thread <thread-id> --from-agent claude-repo-b --repo repo-b
@@ -55,16 +55,13 @@ agent-mailbox answer --thread <thread-id> --from-agent claude-repo-b --repo repo
   --evidence <path:lines> \
   --confidence high
 
-If you need information from another repo:
+If you need information from another repo, use a short topic slug for --thread
+(the --repo value becomes the namespace automatically):
 agent-mailbox ask --from-agent claude-repo-b --to-agent codex-repo-a \
-  --thread <thread-id> \
+  --thread <short-topic-slug> \
   --subject "<short subject>" \
   --question "<specific question>" \
   --repo repo-b
-
-The --repo value is used as the thread namespace by default. To filter your
-inbox to a specific repo's threads:
-agent-mailbox inbox --for-agent claude-repo-b --namespace repo-b --json
 ```
 
 ### Claude skill guidance
@@ -92,15 +89,15 @@ Because Claude supports startup hooks, the skill can assume mailbox context is a
 For Codex, treat the skill as a behavioral layer on top of `AGENTS.md`, `agent-mailbox prompt`, and the CLI commands.
 
 ```text
-At the start of work, inspect mailbox context:
-agent-mailbox prompt --tool codex --agent codex-repo-a
+At the start of work, check your inbox filtered to this repo:
+agent-mailbox inbox --for-agent codex-repo-a --namespace repo-a --mark-seen --json
 
 If a mailbox thread is addressed to codex-repo-a and you take ownership:
 agent-mailbox claim --thread <thread-id> --from-agent codex-repo-a --repo repo-a
 
-If blocked on another repo:
+If blocked on another repo (use a short topic slug for --thread):
 agent-mailbox ask --from-agent codex-repo-a --to-agent claude-repo-b \
-  --thread <thread-id> \
+  --thread <short-topic-slug> \
   --subject "<short subject>" \
   --question "<specific question>" \
   --repo repo-a
@@ -114,9 +111,6 @@ agent-mailbox answer --thread <thread-id> --from-agent codex-repo-a --repo repo-
 When the answer has been used successfully:
 agent-mailbox close --thread <thread-id> --from-agent codex-repo-a --repo repo-a \
   --resolution accepted
-
-To filter your inbox to threads in a specific repo namespace:
-agent-mailbox inbox --for-agent codex-repo-a --namespace repo-a --json
 ```
 
 ### Codex skill guidance

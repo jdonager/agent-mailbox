@@ -31,10 +31,10 @@ If mailbox context is not already injected by a Claude hook, inspect it directly
 
 ```bash
 agent-mailbox prompt --tool claude --agent <agent-id>
-agent-mailbox inbox --for-agent <agent-id> --mark-seen --json
+agent-mailbox inbox --for-agent <agent-id> --namespace <repo-name> --mark-seen --json
 ```
 
-If the inbox is empty, continue with normal repo work.
+Always pass `--namespace <repo-name>` when checking your inbox. This filters to threads relevant to the current repo instead of showing everything on the board. If the inbox is empty, continue with normal repo work.
 
 ## CLI reference
 
@@ -56,17 +56,13 @@ All commands support `--json` for machine-readable output.
 
 ### Check inbox
 
-Start by checking for pending work. The `inbox` command lists active questions addressed to your agent:
-
-```bash
-agent-mailbox inbox --for-agent <agent-id> --json
-```
-
-To narrow to threads in a specific repo namespace:
+Start by checking for pending work. Always filter by namespace (repo name) so you only see threads relevant to the current repo:
 
 ```bash
 agent-mailbox inbox --for-agent <agent-id> --namespace <repo-name> --json
 ```
+
+Omitting `--namespace` returns all threads across all repos, which is rarely what you want.
 
 This returns thread summaries (thread_id, namespace, subject, status, unread). To read the full contents of a specific thread including all events:
 
@@ -84,13 +80,13 @@ Use this when another repo or agent needs to answer a specific question:
 agent-mailbox ask \
   --from-agent <agent-id> \
   --to-agent <target-agent> \
-  --thread <thread-id> \
+  --thread <short-topic-slug> \
   --subject "<short subject>" \
   --question "<specific question>" \
   --repo <repo-name>
 ```
 
-The `--repo` value is used as the thread namespace by default. Use `--namespace` to override if needed.
+**Thread naming convention:** Use a short topic slug for `--thread` (e.g., `reload-validation`, `jwt-kid-check`). The `--repo` value automatically becomes the thread's namespace, so the receiving agent can find it by filtering `inbox --namespace <repo-name>`. Do not embed the repo name in the thread ID itself.
 
 ### Claim
 
