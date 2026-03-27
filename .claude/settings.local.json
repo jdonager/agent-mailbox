@@ -7,7 +7,9 @@
       "Bash(git push:*)",
       "Bash(gh pr:*)",
       "Bash(sips --help)",
-      "Bash(sips:*)"
+      "Bash(sips:*)",
+      "Bash(xargs grep:*)",
+      "Bash(python3:*)"
     ]
   }
 }
