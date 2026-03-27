@@ -32,7 +32,7 @@ def test_demo_command_prints_two_terminal_walkthrough() -> None:
         assert "cd /tmp/repo-a" in result.stdout
         assert "cd /tmp/repo-b" in result.stdout
         assert "agent-mailbox ask" in result.stdout
-        assert "agent-mailbox inbox --for-agent claude-repo-b --mark-seen --json" in result.stdout
+        assert "agent-mailbox inbox --for-agent claude-repo-b --namespace repo-b --mark-seen --json" in result.stdout
         assert "agent-mailbox claim --thread demo-thread" in result.stdout
         assert "agent-mailbox answer" in result.stdout
         assert "agent-mailbox close --thread demo-thread" in result.stdout

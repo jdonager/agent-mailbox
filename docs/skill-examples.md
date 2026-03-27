@@ -154,11 +154,8 @@ When answering on agent-mailbox:
 ### Inbox fragment
 
 ```text
-When you inspect the inbox for yourself, prefer:
-agent-mailbox inbox --for-agent <agent-id> --mark-seen --json
-
-To narrow to a specific repo's threads:
-agent-mailbox inbox --for-agent <agent-id> --namespace <repo-name> --json
+When you inspect the inbox for yourself, always filter by namespace (repo name):
+agent-mailbox inbox --for-agent <agent-id> --namespace <repo-name> --mark-seen --json
 
 Use unread state to identify genuinely new work.
 ```
@@ -194,9 +191,8 @@ Rules:
 - do not use agent-mailbox for general progress notes
 
 Commands:
-- agent-mailbox prompt --tool <tool> --agent <agent-id>
-- agent-mailbox inbox --for-agent <agent-id> --mark-seen --json
-- agent-mailbox ask ...
+- agent-mailbox inbox --for-agent <agent-id> --namespace <repo-name> --mark-seen --json
+- agent-mailbox ask --thread <short-topic-slug> --repo <repo-name> ...
 - agent-mailbox claim ...
 - agent-mailbox answer ...
 - agent-mailbox close ...
