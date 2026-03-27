@@ -90,10 +90,10 @@ Thread IDs must not contain path separators (`/` or `\`). Keep thread IDs as sho
 ~/.agent-mailbox/
   events/
     2026-03-20/
-      2026-03-20T15-42-11Z__01JQ...__question__repo-b-jwt-kid-validation.json
-      2026-03-20T15-43-00Z__01JQ...__claim__repo-b-jwt-kid-validation.json
-      2026-03-20T15-46-30Z__01JQ...__answer__repo-b-jwt-kid-validation.json
-      2026-03-20T15-48-10Z__01JQ...__close__repo-b-jwt-kid-validation.json
+      2026-03-20T15-42-11Z__01JQ...__question__jwt-kid-validation.json
+      2026-03-20T15-43-00Z__01JQ...__claim__jwt-kid-validation.json
+      2026-03-20T15-46-30Z__01JQ...__answer__jwt-kid-validation.json
+      2026-03-20T15-48-10Z__01JQ...__close__jwt-kid-validation.json
   archive/events/
   cursors/
   config.json

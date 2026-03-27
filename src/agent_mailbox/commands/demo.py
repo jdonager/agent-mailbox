@@ -29,7 +29,7 @@ def command(
         "",
         "Terminal 2",
         f"cd {repo_b_path}",
-        f"agent-mailbox inbox --for-agent {agent_b} --mark-seen --json",
+        f"agent-mailbox inbox --for-agent {agent_b} --namespace {repo_b_name} --mark-seen --json",
         f"agent-mailbox claim --thread {thread} --from-agent {agent_b} --repo {repo_b_name}",
         (
             "agent-mailbox answer "
